@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel src -d build", 
+    "build": "babel src -d build",
     "test": "eslint . --fix && jest --coverage --detectOpenHandles --forceExit --runInBand",
     "tests": "jest --coverage --detectOpenHandles --forceExit --runInBand",
     "test-logs": "jest --coverage --detectOpenHandles --runInBand",
