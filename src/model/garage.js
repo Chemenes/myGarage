@@ -7,18 +7,10 @@ const garageSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  // this url will map back to the AWS url that AWS S3 gives me after successful upload
-  url: {
-    type: String,
-    required: true,
-  },
-  // also comes from AWS
-  fileName: {
-    type: String,
-  },
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
+    ref: 'accountId',    
   },
   vehicles: [{
     type: mongoose.Schema.Types.ObjectId,
