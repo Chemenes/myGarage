@@ -9,20 +9,16 @@ const createAccountMockPromise = async () => {
     password: faker.lorem.words(5),
   };
 
-  return Account.create(originalRequest.username, originalRequest.email, originalRequest.password)
-    .then((account) => {
-      mockData.originalRequest = originalRequest;
-      mockData.account = account;
-      return account.createTokenPromise();
-    })
-    .then((token) => {
-      mockData.token = token; 
-      return Account.findById(mockData.account._id);
-    })
-    .then((account) => {
-      mockData.account = account;
-      return mockData;
-    });
+  const account = await Account.create(originalRequest.username, originalRequest.email, originalRequest.password);
+  mockData.originalRequest = originalRequest;
+  mockData.account = account;
+
+  const token = await account.createTokenPromise();
+  mockData.token = token; 
+
+  const foundAccount = await Account.findById(mockData.account._id);
+  mockData.account = foundAccount;
+  return mockData;
 };
 
 const removeAccountMockPromise = () => Account.remove({});
