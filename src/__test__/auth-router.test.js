@@ -12,40 +12,35 @@ describe('AUTH router', () => {
   afterAll(stopServer);
   beforeEach(removeAccountMockPromise);
 
-  test('POST 200 to /api/signup for successful account creation and receipt of a TOKEN', () => {
+  test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
       email: faker.internet.email(),
       password: 'thisIsATerriblePassword1234',
     };
-    return superagent.post(`${apiUrl}/signup`)
-      .send(mockAccount)
-      .then((response) => {
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-      })
-      .catch((err) => {
-        throw err;
-      });
+    try {
+      const response = await superagent.post(`${apiUrl}/signup`)
+        .send(mockAccount);
+      expect(response.status).toEqual(200);
+      expect(response.body.token).toBeTruthy();
+    } catch (err) {
+      expect(err.message).toEqual('Unexpected error testing good signup.');
+    }
   });
 
-  test('POST 409 to api/signup conflicting user info', () => {
-    let conflict;
-    return createAccountMockPromise()
-      .then((mockData) => {
-        conflict = mockData.originalRequest;
-        return superagent.post(`${apiUrl}/signup`)
-          .send(conflict); // this is how we send authorization headers via REST/HTTP
-      })
-      .then((response) => {
-        // When I login, I get a 200 status code and a TOKEN
-        expect(response.status).toEqual(409);
-        expect(response.body.token).toBeTruthy();
-        // expect(response.body.token).toEqual(token);
-      })
-      .catch((err) => {
-        expect(err.status).toEqual(409);
-      });
+  test('api/signup 409 409 conflicting user info', async () => {
+    const mockData = await createAccountMockPromise();
+    const conflict = mockData.originalRequest;
+    try {
+      const response = await superagent.post(`${apiUrl}/signup`)
+        .send(conflict); // this is how we send authorization headers via REST/HTTP
+      // When I login, I get a 200 status code and a TOKEN
+      expect(response.status).toEqual(409);
+      expect(response.body.token).toBeTruthy();
+      // expect(response.body.token).toEqual(token);
+    } catch (err) {
+      expect(err.status).toEqual(409);
+    }
   });
 
   test('POST 400 to api/signup missing user info', () => {

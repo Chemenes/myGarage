@@ -13,7 +13,7 @@ export default (error, request, response, next) => { /*eslint-disable-line*/
   // if we make it this far, it's another type of error potentially related to MongoDB
 
   const errorMessage = error.message.toLowerCase();
-
+  console.log('######### error mw message', errorMessage);
   switch (true) {
     case (errorMessage.includes('validation failed')):
       logger.log(logger.ERROR, `ERROR MIDDLEWARE: Responding with a 400 code ${errorMessage}`);
@@ -21,7 +21,7 @@ export default (error, request, response, next) => { /*eslint-disable-line*/
     case (errorMessage.includes('unauthorized')):
       logger.log(logger.ERROR, `ERROR MIDDLEWARE: Responding with a 401 code ${errorMessage}`);
       return response.sendStatus(401);
-    case errorMessage.includes('objectid failed'):
+    case (errorMessage.includes('objectid failed')):
       logger.log(logger.ERROR, `ERROR MIDDLEWARE: Responding with a 404 status code ${errorMessage}`);
       return response.sendStatus(404);
     case (errorMessage.includes('duplicate key')):

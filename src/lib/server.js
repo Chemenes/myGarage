@@ -31,6 +31,7 @@ app.all('*', (request, response) => {
   return response.sendStatus(404).send('Route Not Registered');
 });
 
+app.use(errorMiddleware);
 
 const startServer = () => {
   return mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
