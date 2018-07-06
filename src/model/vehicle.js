@@ -13,12 +13,12 @@ const vehicleSchema = mongoose.Schema({
     ref: 'accountId',
   },
   garageId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'garageId',
   },
   profileId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'profileId',
   },
@@ -29,7 +29,7 @@ const vehicleSchema = mongoose.Schema({
     default: 'car',
   },
   maintenanceLogs: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'maintenanceLogs',
   }],
   files: [{

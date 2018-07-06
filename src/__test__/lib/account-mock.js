@@ -1,7 +1,7 @@
 import faker from 'faker';
 import Account from '../../model/account';
 
-const createAccountMockPromise = () => {
+const createAccountMockPromise = async () => {
   const mockData = {};
   const originalRequest = {
     username: faker.internet.userName(),
@@ -13,7 +13,7 @@ const createAccountMockPromise = () => {
     .then((account) => {
       mockData.originalRequest = originalRequest;
       mockData.account = account;
-      return account.createTokenPromise(); // this line changes the token seed
+      return account.createTokenPromise();
     })
     .then((token) => {
       mockData.token = token; 

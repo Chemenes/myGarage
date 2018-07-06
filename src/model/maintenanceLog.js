@@ -13,13 +13,13 @@ const maintenanceLogSchema = mongoose.Schema({
     ref: 'accountId',    
   },
   vehicleId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
     ref: 'vehicleId',
   },
   logs: {
     type: String,
-  }
+  },
 }, { timestamps: true });
 
 
