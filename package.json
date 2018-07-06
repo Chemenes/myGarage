@@ -1,0 +1,56 @@
+{
+  "name": "myGarage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src -d build", 
+    "test": "eslint . --fix && jest --coverage --detectOpenHandles --forceExit --runInBand",
+    "tests": "jest --coverage --detectOpenHandles --forceExit --runInBand",
+    "test-logs": "jest --coverage --detectOpenHandles --runInBand",
+    "start": "npm run build && node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chemenes/myGarage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chemenes/myGarage/issues"
+  },
+  "homepage": "https://github.com/Chemenes/myGarage#readme",
+  "devDependencies": {
+    "aws-sdk-mock": "^4.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "dotenv": "^6.0.0",
+    "eslint": "^5.0.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jest": "^21.17.0",
+    "faker": "^4.1.0",
+    "jest": "^23.3.0",
+    "nodemon": "^1.17.5",
+    "superagent": "^3.8.3",
+    "superagent-auth-bearer": "0.0.1",
+    "winston": "^3.0.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.270.1",
+    "babel-polyfill": "^6.26.0",
+    "bcrypt": "^3.0.0",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "fs-extra": "^6.0.1",
+    "http-errors": "^1.6.3",
+    "jsonwebtoken": "^8.3.0",
+    "mongoose": "^5.2.1",
+    "multer": "^1.3.1",
+    "multer-s3": "^2.7.0"
+  }
+}
