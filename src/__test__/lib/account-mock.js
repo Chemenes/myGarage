@@ -1,7 +1,7 @@
 import faker from 'faker';
 import Account from '../../model/account';
 
-const createAccountMockPromise = () => {
+const createAccountMockPromise = async () => {
   const mockData = {};
   const originalRequest = {
     username: faker.internet.userName(),
@@ -9,20 +9,16 @@ const createAccountMockPromise = () => {
     password: faker.lorem.words(5),
   };
 
-  return Account.create(originalRequest.username, originalRequest.email, originalRequest.password)
-    .then((account) => {
-      mockData.originalRequest = originalRequest;
-      mockData.account = account;
-      return account.createTokenPromise(); // this line changes the token seed
-    })
-    .then((token) => {
-      mockData.token = token; 
-      return Account.findById(mockData.account._id);
-    })
-    .then((account) => {
-      mockData.account = account;
-      return mockData;
-    });
+  const account = await Account.create(originalRequest.username, originalRequest.email, originalRequest.password);
+  mockData.originalRequest = originalRequest;
+  mockData.account = account;
+
+  const token = await account.createTokenPromise();
+  mockData.token = token; 
+
+  const foundAccount = await Account.findById(mockData.account._id);
+  mockData.account = foundAccount;
+  return mockData;
 };
 
 const removeAccountMockPromise = () => Account.remove({});

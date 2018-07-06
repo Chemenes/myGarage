@@ -19,7 +19,7 @@ const maintenanceLogSchema = mongoose.Schema({
   },
   logs: {
     type: String,
-  }
+  },
 }, { timestamps: true });
 
 
