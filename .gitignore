@@ -1,7 +1,7 @@
 .idea/
 db/
 *.log
-src/temp/
+src/temp/*
 build/
 
 .env
