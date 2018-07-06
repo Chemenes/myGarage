@@ -10,6 +10,11 @@
     "test-logs": "jest --coverage --detectOpenHandles --runInBand",
     "start": "npm run build && node index.js"
   },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/src/__test__/lib/test.env.js"
+    ]
+  },  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Chemenes/myGarage.git"

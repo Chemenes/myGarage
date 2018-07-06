@@ -1,13 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import logger from './logger';
 
 
 // middleware
-
+import errorMiddleware from './middleware/error-middleware';
+import loggerMiddleware from './middleware/logger-middleware';
 
 // our routes
-
+import authRouter from '../router/auth-router';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,11 +23,12 @@ app.use(express.json());
 
 
 // our own api routers or middleware
-
+app.use(loggerMiddleware);
+app.use(authRouter);
 
 app.all('*', (request, response) => {
   console.log('returning 404 from the catch/all route');
-  return response.sendStatus(404).send('Route Not Registeres');
+  return response.sendStatus(404).send('Route Not Registered');
 });
 
 
