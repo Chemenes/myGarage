@@ -6,12 +6,11 @@ import { createAccountMockPromise, removeAccountMockPromise } from './lib/accoun
 
 
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
+beforeAll(startServer);
+afterAll(stopServer);
+beforeEach(removeAccountMockPromise);
 
 describe('AUTH router', () => {
-  beforeAll(startServer);
-  afterAll(stopServer);
-  beforeEach(removeAccountMockPromise);
-
   test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
@@ -28,100 +27,87 @@ describe('AUTH router', () => {
     }
   });
 
-  test('api/signup 409 409 conflicting user info', async () => {
+  test('api/signup 409 conflicting user info', async () => {
     const mockData = await createAccountMockPromise();
     const conflict = mockData.originalRequest;
     try {
       const response = await superagent.post(`${apiUrl}/signup`)
-        .send(conflict); // this is how we send authorization headers via REST/HTTP
-      // When I login, I get a 200 status code and a TOKEN
-      expect(response.status).toEqual(409);
-      expect(response.body.token).toBeTruthy();
-      // expect(response.body.token).toEqual(token);
+        .send(conflict);
+      
+      expect(response).toEqual('Unexpected status 409 test');
     } catch (err) {
       expect(err.status).toEqual(409);
     }
   });
 
-  test('POST 400 to api/signup missing user info', () => {
+  test('api/signup 400 missing user info', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
-      // email: faker.internet.email(),
       password: 'thisIsATerriblePassword1234',
     };
-    return superagent.post(`${apiUrl}/signup`)
-      .send(mockAccount)
-      .then((response) => {
-        throw response;
-        // expect(response.status).toEqual(200);
-        // expect(response.body.token).toBeTruthy();
-      })
-      .catch((err) => {
-        expect(err.status).toEqual(400);
-      });
+    try {
+      const response = await superagent.post(`${apiUrl}/signup`)
+        .send(mockAccount);
+      expect(response).toEqual('Unexpected 400 missing email');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
+  });
+});
+
+describe('basic AUTH router Get tests', () => {
+  test('GET 200 to api/login for successful login and receipt of a TOKEN', async () => {
+    const mockData = await createAccountMockPromise();
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth(mockData.account.username, mockData.originalRequest.password); 
+      expect(response.status).toEqual(200);
+      expect(response.body.token).toBeTruthy();
+    } catch (err) {
+      expect(err.status).toEqual('Unexpected error response from valid signIn');
+    }
   });
 
-  test('GET 200 to api/login for successful login and receipt of a TOKEN', () => {
-    // in order to login, we need to create a mock account first
-    // let token;
-    return createAccountMockPromise()
-      .then((mockData) => {
-        // token = mockData.token; 
-        return superagent.get(`${apiUrl}/login`)
-          .auth(mockData.account.username, mockData.originalRequest.password); // this is how we send authorization headers via REST/HTTP
-      })
-      .then((response) => {
-        // When I login, I get a 200 status code and a TOKEN
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        // expect(response.body.token).toEqual(token);
-      })
-      .catch((err) => {
-        throw err;
-      });
+  test('GET 400 to /api/login for unsuccesful login with missing  password', async () => {
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth('username', undefined);
+      expect(response).toEqual('unexpected status from invalid login ');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
   });
 
-  test('GET 400 to /api/login for unsuccesful login with bad username and password', () => {
-    return superagent.get(`${apiUrl}/login`)
-      .auth('bad username', 'bad password')
-      .then((response) => {
-        throw response;
-      })
-      .catch((err) => {
-        expect(err.status).toEqual(400);
-      });
+  test('GET 400 to /api/login for unsuccesful login with missing username', async () => {
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth(undefined, 'password');
+      expect(response).toEqual('Unexpected good status from missing username test');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
   });
 
-  test('GET 400 to api/login for good username, bad password', () => {
-    // in order to login, we need to create a mock account first
-    // let token;
-    return createAccountMockPromise()
-      .then((mockData) => {
-        // token = mockData.token; 
-        return superagent.get(`${apiUrl}/login`)
-          .auth(mockData.account.username, 'nottheirpassword');
-      })
-      .then((response) => {
-        throw response;
-      })
-      .catch((err) => {
-        expect(err.status).toEqual(400);
-      });
+
+  test('GET 400 to api/login for good username, bad password', async () => {
+    const mockData = await createAccountMockPromise();
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth(mockData.account.username, 'nottheirpassword');
+      expect(response).toEqual('Unexpected good status from bad password test');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
   });
 
-  test('GET 400 to api/login for bad username, good password', () => {
-    // in order to login, we need to create a mock account first
-    // let token;
-    return createAccountMockPromise()
-      .then((mockData) => {
-        return superagent.get(`${apiUrl}/login`)
-          .auth('nottherightusername', mockData.account.password);
-      })
-      .then((response) => {
-        throw response;
-      })
-      .catch((err) => {
-        expect(err.status).toEqual(400);
-      });
+  test('GET 400 to api/login for bad username, good password', async () => {
+    const mockData = await createAccountMockPromise();
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth('wrongUsername', mockData.account.password);
+      expect(response).toEqual('Unexpected good status from bad username test');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
   });
 });
