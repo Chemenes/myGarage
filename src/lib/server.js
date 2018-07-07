@@ -1,8 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import logger from './logger';
-
 
 // middleware
 import errorMiddleware from './middleware/error-middleware';
