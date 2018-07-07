@@ -30,6 +30,7 @@ const accountSchema = mongoose.Schema({
 }, { timestamps: true });
 
 accountSchema.methods.verifyPasswordPromise = function verifyPasswordPromise(password) {
+  console.log('######### verify password:', password);
   return bcrypt.compare(password, this.passwordHash)
     .then((result) => {
       // result is just a boolean letting us know if the plain text password received equals the hashed password
@@ -60,6 +61,7 @@ const skipInit = process.env.NODE_ENV === 'development';
 const Account = mongoose.model('accounts', accountSchema, 'accounts', skipInit);
 
 Account.create = (username, email, password) => {
+  console.log('$$$$$$$$ Account.create password:', password);
   return bcrypt.hash(password, HASH_ROUNDS)
     .then((passwordHash) => {
       password = null; /*eslint-disable-line*/
