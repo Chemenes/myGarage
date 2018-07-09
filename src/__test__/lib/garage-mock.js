@@ -4,7 +4,7 @@ import Garage from '../../model/garage';
 
 import { createAttachmentMockPromise, removeAttProfAccntMock } from './attachment-mock';
 
-const createGaragetMockPromise = async () => {
+const createGarageMockPromise = async () => {
   const mockData = {};
 
   const mockGarageData = await createAttachmentMockPromise();
@@ -19,19 +19,20 @@ const createGaragetMockPromise = async () => {
     description: faker.lorem.words(8),
     location: `${faker.address.city()}, ${faker.address.state()}`,
     profileId: mockData.profile._id,
-    // vehicles?  Need to mock vehicles first.    
+    // vehicles?  Need to mock vehicles first.  
+    attachments: [mockData.attachment._id],  
   }).save();
 
-  mockData.attachment = attachment;
+  mockData.garage = garage;
 
   return mockData;
 };
 
-const removeAttProfAccntMock = () => {
+const removeGarAttProfAccntMock = () => {
   return Promise.all([
-    Attachment.remove(),
-    removeAllResources(),
+    Garage.remove(),
+    removeAttProfAccntMock(),
   ]);
 };
 
-export { createAttachmentMockPromise, removeAttProfAccntMock };
+export { createGarageMockPromise, removeGarAttProfAccntMock };
