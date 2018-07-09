@@ -9,7 +9,7 @@ import loggerMiddleware from './middleware/logger-middleware';
 
 // our routes
 import authRouter from '../router/auth-router';
-
+import profileRouter from '../router/profile-router';
 const app = express();
 const PORT = process.env.PORT || 3000;
 let server = null;
@@ -24,6 +24,7 @@ app.use(express.json());
 // our own api routers or middleware
 app.use(loggerMiddleware);
 app.use(authRouter);
+app.use(profileRouter);
 
 app.all('*', (request, response) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
