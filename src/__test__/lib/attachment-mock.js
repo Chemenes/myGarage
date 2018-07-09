@@ -24,12 +24,14 @@ const createAttachmentMockPromise = async () => {
 
   mockData.attachment = attachment;
 
-  const removeAttProfAccntMock = () => {
-    return Promise.all([
-      Attachment.remove(),
-      removeAllResources(),
-    ]);
-  };
+  return mockData;
+};
+
+const removeAttProfAccntMock = () => {
+  return Promise.all([
+    Attachment.remove(),
+    removeAllResources(),
+  ]);
 };
 
 export { createAttachmentMockPromise, removeAttProfAccntMock };
