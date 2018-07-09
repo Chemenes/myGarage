@@ -14,10 +14,10 @@ const createVehicleMockPromise = async () => {
     model: faker.name.firstName(),
     type: 'car',
     garageId: mockGarageData.garage._id,
-    accountId: mockGarageData.account._id,
+    profileId: mockGarageData.profile._id,
   };
 
-  const vehicle = await Vehicle.create(originalRequest.username, originalRequest.email, originalRequest.password);
+  const vehicle = await Vehicle.create(originalRequest.name, originalRequest.make, originalRequest.model, originalRequest.type);
   mockData.originalRequest = originalRequest;
   mockData.vehicle = vehicle;
 
