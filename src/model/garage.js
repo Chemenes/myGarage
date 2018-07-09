@@ -18,6 +18,10 @@ const garageSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'vehicles',
   }],
+  attachments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'attachments',
+  }],
 }, { timestamps: true });
 
 
