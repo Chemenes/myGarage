@@ -36,8 +36,9 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .authBearer(token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile);
+        console.log('####### tst body', response.body);
         expect(response.status).toEqual(200);
-        expect(response.body.originalName).toEqual('R1200.JPG');
+        expect(response.body.originalName).toEqual('r1200.jpg');
         expect(response.body._id).toBeTruthy();
         expect(response.body.url).toBeTruthy();
         Object.assign(attachment, response.body);
@@ -51,8 +52,8 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       try {
         const response = await superagent.post(apiUrl)
           .authBearer(token)
-          .field('thisdoesntexist', 'R1200.JPG')
-          .attach('attachment', testFile);
+          .field('weDontCareAboutThisField', 'R1200.JPG');
+          // .attach('attachment', testFile);
         expect(response).toEqual('POST 400 unexpected response');
       } catch (err) {
         expect(err.status).toEqual(400);
@@ -75,10 +76,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   describe('GET ROUTES to /api/attachments', () => {
     test('200 GET /api/attachments for successful fetching', async () => {
       try {
+        console.log('$$$$$$$$ attachment', attachment);
         const response = await superagent.get(`${apiUrl}/${attachment._id}`)
           .authBearer(token);
         expect(response.status).toEqual(200);
-        expect(response.body.orignalName).toEqual(attachment.originalName);
+        expect(response.body.originalName).toEqual(attachment.originalName);
         expect(response.body.profileId).toEqual(attachment.profileId.toString());
         expect(response.body.url).toEqual(attachment.url);
         expect(response.body.awsKey).toEqual(attachment.awsKey);
