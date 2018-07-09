@@ -11,8 +11,10 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 const attachmentRouter = new Router();
 
 attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
+  console.log('####### POST request.body', request.body);
+  console.log('####### POST request.files', request.files);
   if (!request.account) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: not authorized'));
-  if (!request.body.title || request.files.length > 1) {
+  if (request.files.length !== 1) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request'));
   }
   const [file] = request.files;
@@ -20,14 +22,17 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
   logger.log(logger.INFO, `ATTACHMENT ROUTER POST: valid file ready to to upload: ${JSON.stringify(file, null, 2)}`);
 
   const key = `${file.filename}.${file.originalname}`;
+  console.log('##### POST calling s3Upload with', file.path, key);
   return s3Upload(file.path, key)
     .then((url) => {
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: received a valid URL from Amazon S3: ${url}`);
       return new Attachment({
-        title: request.body.title,
-        accountId: request.account._id,
-        fileName: key,
+        originalName: file.originalname,
+        encoding: file.encoding,
+        mimeType: file.mimetype,
         url,
+        awsKey: key,
+        profileId: request.profile._id,
       }).save();
     })
     .then((newAttachment) => {
@@ -50,12 +55,12 @@ attachmentRouter.get('/api/attachments/:id?', bearerAuthMiddleware, (request, re
 });
 
 attachmentRouter.delete('/api/attachments/:id?', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(401), 'ATTACHMENT ROUTER DELETE: invalid request');
+  if (!request.profile) return next(new HttpErrors(401), 'ATTACHMENT ROUTER DELETE: invalid request');
   if (!request.params.id) return next(new HttpErrors(400, 'ATTACHMENT ROUTER DELETE: no id provided'));
   return Attachment.findById(request.params.id)
     .then((attachment) => {
       if (!attachment) return next(new HttpErrors(404, 'ATTACHMENT ROUTER DELETE: attachment not found in database'));
-      const key = attachment.fileName;
+      const key = attachment.awsKey;
       return s3Remove(key);
     })
     .then((result) => {

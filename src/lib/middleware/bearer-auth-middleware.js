@@ -3,6 +3,7 @@ import jsonWebToken from 'jsonwebtoken';
 import { promisify } from 'util';
 import Account from '../../model/account';
 import logger from '../logger';
+import Profile from '../../model/profile';
 
 const jwtVerify = promisify(jsonWebToken.verify);
 
@@ -28,6 +29,11 @@ export default (request, response, next) => {
     .then((account) => {
       if (!account) return next(new HttpErrors(404, 'BEARER AUTH - no account found'));
       request.account = account;
+      return Profile.findOne({ accountId: account._id });
+    })
+    .then((profile) => {
+      console.log('$$$$$$$$ BAMW profile', profile);
+      request.profile = profile;
       return next();
     })
     .catch(next);

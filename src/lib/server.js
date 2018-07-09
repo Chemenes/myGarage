@@ -10,6 +10,8 @@ import loggerMiddleware from './middleware/logger-middleware';
 // our routes
 import authRouter from '../router/auth-router';
 import profileRouter from '../router/profile-router';
+import attachmentRouter from '../router/attachment-router';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 let server = null;
@@ -25,6 +27,7 @@ app.use(express.json());
 app.use(loggerMiddleware);
 app.use(authRouter);
 app.use(profileRouter);
+app.use(attachmentRouter);
 
 app.all('*', (request, response) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
@@ -49,7 +52,7 @@ const stopServer = () => {
   return mongoose.disconnect()
     .then(() => {
       server.close(() => {
-        console.log('Sever is off');
+        console.log('Server is off');
       });
     })
     .catch((err) => {
