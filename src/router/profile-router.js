@@ -8,7 +8,7 @@ const profileRouter = new Router();
 
 profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
   logger.log(logger.INFO, `.post /api/profiles req.body: ${request.body}`);
-  if (!request.account) return next(new HttpErrors(400, 'POST PROFILE_ROUTER: invalid request'));
+  if (!request.account) return next(new HttpErrors(400, 'POST PROFILE_ROUTER: invalid request', { expose: false }));
 
   Profile.init()
     .then(() => {
@@ -26,7 +26,7 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
 });
 
 profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request'));
+  if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request', { expose: false }));
   if (!Object.keys(request.query).length === 0) {
     return Profile.find().populate()
       .then((profiles) => {
@@ -35,11 +35,11 @@ profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, nex
       .catch(next);
   }
 
-  if (!request.query.id) return next(new HttpErrors(400, 'GET PROFILE ROUTER: bad query'));
+  if (!request.query.id) return next(new HttpErrors(400, 'GET PROFILE ROUTER: bad query', { expose: false }));
 
   Profile.findOne({ _id: request.query.id })
     .then((profile) => {
-      if (!profile) return next(new HttpErrors(400, 'PROFILE ROUTER GET: profile not found'));
+      if (!profile) return next(new HttpErrors(400, 'PROFILE ROUTER GET: profile not found', { expose: false }));
       return response.json(profile);
     })
     .catch(next);
