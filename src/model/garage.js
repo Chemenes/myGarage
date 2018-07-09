@@ -3,11 +3,13 @@
 import mongoose from 'mongoose';
 
 const garageSchema = mongoose.Schema({
-  title: {
+  name: {
     type: String,
     required: true,
   },
-  accountId: {
+  description: String,
+  location: String,
+  profileId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'accountId',    
@@ -20,4 +22,4 @@ const garageSchema = mongoose.Schema({
 
 
 const skipInit = process.env.NODE_ENV === 'development';
-export default mongoose.model('garage', garageSchema, 'garage', skipInit);
+export default mongoose.model('Garage', garageSchema, 'garages', skipInit);

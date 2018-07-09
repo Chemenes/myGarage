@@ -3,15 +3,26 @@
 import mongoose from 'mongoose';
 
 const vehicleSchema = mongoose.Schema({
-  title: {
+  name: {
     type: String,
     required: true,
   },
-  accountId: {
-    type: mongoose.Schema.Types.ObjectId,
+  make: String,
+  model: String,
+  type: {
+    type: String,
     required: true,
-    ref: 'accountId',
+    enum: ['car', 'truck', 'boat', 'rv', 'plane', 'atv', 'suv', 'motorcycle'],
+    default: 'car',
   },
+  maintenanceLogs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'maintenancelogs',
+  }],
+  attachments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'attachments',
+  }],
   garageId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -22,22 +33,8 @@ const vehicleSchema = mongoose.Schema({
     required: true,
     ref: 'profileId',
   },
-  type: {
-    type: String,
-    required: true,
-    enum: ['car', 'truck', 'boat', 'rv', 'plane', 'atv', 'motorcycle'],
-    default: 'car',
-  },
-  maintenanceLogs: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'maintenanceLogs',
-  }],
-  files: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'files',
-  }],
 }, { timestamps: true });
 
 
 const skipInit = process.env.NODE_ENV === 'development';
-export default mongoose.model('vehicle', vehicleSchema, 'vehicle', skipInit);
+export default mongoose.model('Vehicle', vehicleSchema, 'vehicles', skipInit);
