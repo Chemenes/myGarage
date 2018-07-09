@@ -6,9 +6,17 @@ const profileSchema = mongoose.Schema({
     required: true,
   },
   lastName: { type: String },
-  bio: { type: String },
+  bio: String,
   location: String,
-  profileImageUrl: { type: String },
+  profileImageUrl: String,
+  attachments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'attachments',
+  }],
+  garages: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'garages',
+  }],
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

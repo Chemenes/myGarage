@@ -3,25 +3,27 @@
 import mongoose from 'mongoose';
 
 const maintenanceLogSchema = mongoose.Schema({
-  title: {
+  description: {
     type: String,
     required: true,
   },
-  accountId: {
+  dateOfService: Date,
+  profileId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'accountId',    
+    ref: 'profiles',    
   },
   vehicleId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'vehicleId',
+    ref: 'vehicles',
   },
-  logs: {
-    type: String,
-  },
+  attachments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'attachments',
+  }],
 }, { timestamps: true });
 
 
 const skipInit = process.env.NODE_ENV === 'development';
-export default mongoose.model('maintenanceLog', maintenanceLogSchema, 'maintenanceLog', skipInit);
+export default mongoose.model('MaintenanceLog', maintenanceLogSchema, 'maintenancelogs', skipInit);
