@@ -12,7 +12,7 @@ const garageSchema = mongoose.Schema({
   profileId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    ref: 'accountId',    
+    ref: 'profiles',    
   },
   vehicles: [{
     type: mongoose.Schema.Types.ObjectId,
