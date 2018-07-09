@@ -35,6 +35,7 @@ describe('TESTING ROUTER PROFILE', () => {
         location: faker.address.city(),
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
+        
       };
       let response;
       try {
