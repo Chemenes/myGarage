@@ -7,6 +7,7 @@ import logger from '../lib/logger';
 const garageRouter = new Router();
 
 garageRouter.post('/api/garages', bearerAuthMiddleware, (request, response, next) => {
+  console.log('INSIDE POST');
   logger.log(logger.INFO, `.post /api/garages req.body: ${request.body}`);
   if (!request.profile) return next(new HttpErrors(400, 'POST GARAGE_ROUTER: invalid request', { expose: false }));
 
@@ -18,6 +19,7 @@ garageRouter.post('/api/garages', bearerAuthMiddleware, (request, response, next
       }).save();
     })
     .then((garage) => {
+      console.log('THIS IS A GARAGE!!!!!!!! ', garage);
       logger.log(logger.INFO, `POST GARAGE ROUTER: new garage created with 200 code, ${JSON.stringify(garage)}`);
       return response.json(garage);
     })

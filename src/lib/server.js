@@ -11,6 +11,8 @@ import loggerMiddleware from './middleware/logger-middleware';
 import authRouter from '../router/auth-router';
 import profileRouter from '../router/profile-router';
 import attachmentRouter from '../router/attachment-router';
+import garageRouter from '../router/garage-router';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +29,7 @@ app.use(express.json());
 app.use(loggerMiddleware);
 app.use(authRouter);
 app.use(profileRouter);
+app.use(garageRouter);
 app.use(attachmentRouter);
 
 app.all('*', (request, response) => {
