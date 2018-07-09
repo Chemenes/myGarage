@@ -29,7 +29,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     await removeAttProfAccntMock();
   });
 
-  describe('POST ROUTES TO /api/attachmentss', () => {
+  describe('POST ROUTES TO /api/attachments', () => {
     test('POST 200', async () => {
       try {
         const response = await superagent.post(apiUrl)
@@ -73,7 +73,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   });
 
   describe('GET ROUTES to /api/attachments', () => {
-    test('200 GET /api/attachments for succesful fetching', async () => {
+    test('200 GET /api/attachments for successful fetching', async () => {
       try {
         const response = await superagent.get(`${apiUrl}/${attachment._id}`)
           .authBearer(token);
