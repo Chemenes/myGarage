@@ -66,13 +66,11 @@ vehicleRouter.put('/api/vehicles', bearerAuthMiddleware, (request, response, nex
 });
 
 vehicleRouter.delete('/api/vehicles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.vehicle) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
+  if (!request.account) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: bad query', { expose: false }));
 
   Vehicle.init()
-
-   
     .then(() => {
       return Vehicle.remove({ _id: request.query.id });
     })
