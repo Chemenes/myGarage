@@ -11,18 +11,18 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 const attachmentRouter = new Router();
 
 attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
-  console.log('####### POST request.body', request.body);
-  console.log('####### POST request.files', request.files);
   if (!request.account) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: not authorized'));
+
   if (request.files.length !== 1) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request'));
   }
+
   const [file] = request.files;
 
   logger.log(logger.INFO, `ATTACHMENT ROUTER POST: valid file ready to to upload: ${JSON.stringify(file, null, 2)}`);
 
   const key = `${file.filename}.${file.originalname}`;
-  console.log('##### POST calling s3Upload with', file.path, key);
+
   return s3Upload(file.path, key)
     .then((url) => {
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: received a valid URL from Amazon S3: ${url}`);

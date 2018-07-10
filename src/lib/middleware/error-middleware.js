@@ -13,7 +13,7 @@ export default (error, request, response, next) => { /*eslint-disable-line*/
   // if we make it this far, it's another type of error potentially related to MongoDB
 
   const errorMessage = error.message.toLowerCase();
-  console.log('######### error mw message', errorMessage);
+  logger.log(logger.INFO, `ERROR MIDDLEWARE message: ${errorMessage}`);
   switch (true) {
     case (errorMessage.includes('validation failed')):
       logger.log(logger.ERROR, `ERROR MIDDLEWARE: Responding with a 400 code ${errorMessage}`);

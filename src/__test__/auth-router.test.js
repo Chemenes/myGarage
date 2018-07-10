@@ -12,7 +12,7 @@ beforeAll(startServer);
 afterAll(stopServer);
 beforeEach(removeAccountMockPromise);
 
-describe('AUTH router signup tests', () => {
+describe('AUTH router signup (post) tests', () => {
   test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
@@ -57,7 +57,7 @@ describe('AUTH router signup tests', () => {
   });
 });
 
-describe('basic AUTH router login tests', () => {
+describe('basic AUTH router login (get) tests', () => {
   test('GET 200 to api/login for successful login and receipt of a TOKEN', async () => {
     const mockData = await createAccountMockPromise();
     try {
@@ -114,7 +114,7 @@ describe('basic AUTH router login tests', () => {
   });
 });
 
-describe('AUTH-ROUTER PUT (update) tests', () => {
+describe('AUTH-ROUTER update (put) tests', () => {
   test('200 update existing account email address', async () => {
     const mockData = await createAccountMockPromise();
 
@@ -141,6 +141,16 @@ describe('AUTH-ROUTER PUT (update) tests', () => {
       expect(err).toEqual('Unexpected error returned on valid udpate');
     }
     expect(response.status).toEqual(200);
+
+    // now try logging in with the new password...
+    try {
+      response = await superagent.get(`${apiUrl}/login`)
+        .auth(mockData.account.username, 'newPassword'); 
+      expect(response.status).toEqual(200);
+      expect(response.body.token).toBeTruthy();
+    } catch (err) {
+      expect(err).toEqual('Login with new password failed!');
+    }
   });
 
   test('400 update email bad request', async () => {

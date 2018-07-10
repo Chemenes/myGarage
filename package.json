@@ -8,7 +8,8 @@
     "test": "eslint . --fix && jest --coverage --detectOpenHandles --forceExit --runInBand",
     "tests": "jest --coverage --detectOpenHandles --forceExit --runInBand",
     "test-logs": "jest --coverage --detectOpenHandles --runInBand",
-    "start": "npm run build && node index.js"
+    "start": "npm run build && node index.js",
+    "lint": "eslint . --fix"
   },
   "jest": {
     "setupFiles": [
