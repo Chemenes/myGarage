@@ -63,12 +63,12 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
 
-    test('POST 400 to /api/garages for missing required firstName', async () => {
+    test('POST 400 to /api/garages for missing required name', async () => {
       const mockGarage = {
-        bio: faker.lorem.words(20),
-        location: faker.address.city(),
-        // firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
+        // name: faker.lorem.words(1),
+        description: faker.lorem.words(20),
+        location: faker.name.firstName(),
+        profileId: profile._id,
       };
       try {
         const response = await superagent.post(`${apiUrl}/garages`)
