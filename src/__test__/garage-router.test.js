@@ -240,7 +240,7 @@ describe('TESTING ROUTER PROFILE', () => {
     test('PUT 400 bad request', async () => {
       let response;
       const mock = await createGarageMockPromise();
-      const garage = mock.profile; /*eslint-disable-line*/
+      const garage = mock.garage; /*eslint-disable-line*/
       try {
         response = await superagent.put(`${apiUrl}/garages`)
           .query({ id: garage._id.toString() })
