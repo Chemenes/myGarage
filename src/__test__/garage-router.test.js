@@ -247,5 +247,66 @@ describe('TESTING ROUTER PROFILE', () => {
         expect(err.status).toEqual(400);
       }
     });
+
+    describe('DELETE GARAGE ROUTE TESTING', () => {
+      test('DELETE 200 success', async () => {
+        const mock = await createGarageMockPromise();
+        const garage = mock.garage; /*eslint-disable-line*/
+        console.log('-------- Deleting ', garage._id);
+        let response;
+        try {
+          response = await superagent.delete(`${apiUrl}/garages`)
+            .query({ id: profile._id.toString() })
+            .authBearer(token);
+          expect(response.status).toEqual(200);
+        } catch (err) {
+          expect(err).toEqual('Unexpected error on valid delete test');
+        }
+        console.log('------- response status from SA:', response.status);
+      });
+
+      test('DELETE 404 not found', async () => {
+        let response;
+        try {
+          response = await superagent.delete(`${apiUrl}/garages`)
+            .query({ id: '1234568909876543321' })
+            .authBearer(token);
+          expect(response).toEqual('DELETE 404 expected but not received');
+        } catch (err) {
+          expect(err.status).toEqual(404);
+        }
+      });
+
+      test('DELETE 400 bad request', async () => {
+        try {
+          await superagent.delete(`${apiUrl}/garages`)
+            .authBearer(token);
+          expect(true).toEqual('DELETE 400 missing query unexpected success');
+        } catch (err) {
+          expect(err.status).toEqual(400);
+        }
+      });
+
+      test('DELETE 401 bad token', async () => {
+        try {
+          await superagent.delete(`${apiUrl}/garages`)
+            .query({ id: 'thiswontbereached' })
+            .authBearer('badtoken');
+          expect(true).toEqual('DELETE 401 expected but succeeded');
+        } catch (err) {
+          expect(err.status).toEqual(401);
+        }
+      });
+
+      test('DELETE 400 missing token', async () => {
+        try {
+          await superagent.delete(`${apiUrl}/garages`)
+            .query({ id: 'thiswontbereached' });
+          expect(true).toEqual('DELETE 400 expected but succeeded');
+        } catch (err) {
+          expect(err.status).toEqual(400);
+        }
+      });
+    });
   });
 });

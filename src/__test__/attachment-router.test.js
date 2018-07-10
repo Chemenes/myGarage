@@ -118,5 +118,14 @@ describe('TESTING ROUTES AT /api/attachments', () => {
         expect(err.status).toEqual(404);
       }
     });
+    test('DELETE 400 bad request', async () => {
+      try {
+        await superagent.delete(`${apiUrl}`)
+          .authBearer(token);
+        expect(true).toEqual('DELETE 400 missing query unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
   });
 });

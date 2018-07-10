@@ -235,5 +235,45 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err.status).toEqual(400);
       }
     });
+
+    describe('DELETE MAINTENANCE-LOG ROUTE TESTING', () => {
+      test('DELETE 200 success', async () => {
+        const mock = await
+        createMaintenanceLogMockPromise();
+        const maintenanceLog = mock.maintenanceLog; /*eslint-disable-line*/
+        console.log('^^^^^^ Delete', maintenanceLog._id);
+        let response;
+        try {
+          response = await superagent.put(`${apiUrl}/maintenance-Logs`)
+            .query({ id: maintenanceLog._id.toString() })
+            .authBearer(token);
+          expect(response).toEqual('We should have failed with a 400');
+        } catch (err) {
+          expect(err.status).toEqual(400);
+        }
+      });
+    });
+
+    test('DELETE 404 not found', async () => {
+      let response;
+      try {
+        response = await
+        superagent.delete(`${apiUrl}/maintenance-Logs`)
+          .query({ id: '29084024943020' })
+          .authBearer(token);
+        expect(response).toEqual('DELETE 404 expected but not received');
+      } catch (err) {
+        expect(err.status).toEqual(404);
+      }
+    });
+    test('DELETE 400 bad request', async () => {
+      try {
+        await superagent.delete(`${apiUrl}/maintenance-Logs`)
+          .authBearer(token);
+        expect(true).toEqual('DELETE 400 missing query unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
   });
 });
