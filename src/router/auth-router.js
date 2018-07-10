@@ -5,6 +5,7 @@ import Account from '../model/account';
 import basicAuthMiddleware from '../lib/middleware/basic-auth-middleware';
 import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
+import profile from '../model/profile';
 // import { http } from 'winston';
 
 const HASH_ROUNDS = 4;
@@ -74,14 +75,22 @@ authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response,
 });
 
 authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
+  let savedToken;
   if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: invalid request', { expose: false }));
   Account.init()
     .then(() => {
       return request.account.createTokenPromise();
     })
     .then((token) => {
-      logger.log(logger.INFO, `AUTH-ROUTER /api/login - responding with a 200 status code and a token ${token}`);
-      return response.json({ id: request.account._id, token });
+      savedToken = token;
+      return profile.findOne({ accountId: request.account._id });
+    })
+    .then((newProfile) => {
+      logger.log(logger.INFO, 'AUTH-ROUTER /api/login - responding with a 200 status code and a token ');
+      if (newProfile === null) {
+        return response.json({ profileId: null, token: savedToken });
+      }
+      return response.json({ profileId: newProfile._id, token: savedToken });
     })
     .catch(next);
   return undefined;

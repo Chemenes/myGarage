@@ -65,6 +65,7 @@ describe('basic AUTH router login (get) tests', () => {
         .auth(mockData.account.username, mockData.originalRequest.password); 
       expect(response.status).toEqual(200);
       expect(response.body.token).toBeTruthy();
+      expect(response.body.profileId).toBeDefined();
     } catch (err) {
       expect(err.status).toEqual('Unexpected error response from valid signIn');
     }
