@@ -263,7 +263,7 @@ describe('TESTING VEHICLE ROUTER', () => {
       }
     });
 
-    test.only('DELETE 400 bad request', async () => {
+    test('DELETE 400 bad request', async () => {
       try {
         await superagent.delete(`${apiUrl}/vehicles`)
           .authBearer(token);
