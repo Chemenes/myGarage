@@ -45,13 +45,11 @@ describe('TESTING MAINT LOG ROUTER', () => {
       maintLog.description = faker.lorem.words(5);
       maintLog.attachments.push(attachment._id);
       let response;
-      console.log('%%%%%%%% PUTing maintLog', JSON.stringify(maintLog, null, 2));
       try {
         response = await superagent.put(`${apiUrl}/maintenance-logs`)
           .query({ id: maintLog._id.toString() })
           .authBearer(token)
           .send(maintLog);
-        console.log('%%%%%%% post maintLog PUT body:', JSON.stringify(response.body, null, 2));
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
       }
@@ -114,7 +112,6 @@ describe('TESTING MAINT LOG ROUTER', () => {
         profileId: mockData.vehicle.profileId,
       };
       let response;
-      console.log('############ MOCK LOG ', mockMaintenanceLog);
       try {
         response = await superagent.post(`${apiUrl}/maintenance-logs`)
           .authBearer(mockData.token)
@@ -179,7 +176,6 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err).toEqual('POST 200 test that should pass');
       }
       expect(response.status).toEqual(200);
-      console.log('%%%%%%%% GETTING maintLog', response);
       expect(response.body.profileId).toEqual(maintLog.profileId.toString());
       expect(response.body.dateOfService).toBeTruthy(); // date format hard to compare
       expect(response.body.attachments).toHaveLength(1);

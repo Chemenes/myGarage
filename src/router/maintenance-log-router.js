@@ -27,13 +27,7 @@ maintenanceLogRouter.post('/api/maintenance-logs', bearerAuthMiddleware, (reques
 
 maintenanceLogRouter.get('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
   if (!request.account) return next(new HttpErrors(400, 'GET MAINTENANCE_LOG ROUTER: invalid request', { expose: false }));
-  // if (!Object.keys(request.query).length === 0) {
-  //   return MaintenanceLog.find().populate()
-  //     .then((maintenancelogs) => {
-  //       return response.json(maintenancelogs);
-  //     })
-  //     .catch(next);
-  // }
+
   if (!request.query.id) return next(new HttpErrors(400, 'GET MAINTENANCELOG ROUTER: bad query', { expose: false }));
 
   MaintenanceLog.findById({ _id: request.query.id })

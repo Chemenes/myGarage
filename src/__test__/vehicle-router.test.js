@@ -40,9 +40,6 @@ describe('TESTING VEHICLE ROUTER', () => {
         profileId: garage.profileId._id,
       };
       let response;
-      console.log('$$$$$$ MOCK GARAGE ', garage);
-      
-      console.log('$$$$$$ MOCK VEHICLE ', mockVehicle);
       
       try {
         response = await superagent.post(`${apiUrl}/vehicles`)
@@ -95,7 +92,6 @@ describe('TESTING VEHICLE ROUTER', () => {
       let mockVehicleData;
       try {
         mockVehicleData = await createVehicleMockPromise();
-        console.log('||||||||| MOCKVEHICLEDATA', mockVehicleData);
       } catch (err) {
         throw err;
       }

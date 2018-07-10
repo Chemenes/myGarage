@@ -247,7 +247,6 @@ describe('TESTING ROUTER PROFILE', () => {
     test('DELETE 200 success', async () => {
       const mock = await createProfileMockPromise();
       const profile = mock.profile; /*eslint-disable-line*/
-      console.log('-------- Deleting ', profile._id);
       let response;
       try {
         response = await superagent.delete(`${apiUrl}/profiles`)
@@ -257,7 +256,6 @@ describe('TESTING ROUTER PROFILE', () => {
       } catch (err) {
         expect(err).toEqual('Unexpected error on valid delete test');
       }
-      console.log('------- response status from SA:', response.status);
     });
 
     test('DELETE 404 not found', async () => {

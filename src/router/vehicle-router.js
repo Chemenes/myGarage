@@ -9,7 +9,6 @@ import MaintenanceLog from '../model/maintenance-log';
 const vehicleRouter = new Router();
 
 vehicleRouter.post('/api/vehicles', bearerAuthMiddleware, (request, response, next) => {
-  console.log('INSIDE POST');
   logger.log(logger.INFO, `.post /api/vehicles req.body: ${request.body}`);
   if (!request.profile) return next(new HttpErrors(400, 'POST VEHICLE_ROUTER: invalid request', { expose: false }));
 
@@ -21,7 +20,6 @@ vehicleRouter.post('/api/vehicles', bearerAuthMiddleware, (request, response, ne
       }).save();
     })
     .then((vehicle) => {
-      console.log('THIS IS A VEHICLE!!!!!!!! ', vehicle);
       logger.log(logger.INFO, `POST VEHICLE ROUTER: new vehicle created with 200 code, ${JSON.stringify(vehicle)}`);
       return response.json(vehicle);
     })

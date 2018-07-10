@@ -38,7 +38,6 @@ describe('TESTING ROUTER PROFILE', () => {
         profileId: profile._id,
       };
       let response;
-      console.log('$$$$$$ MOCK GARAGE ', mockGarage);
       
       try {
         response = await superagent.post(`${apiUrl}/garages`)
@@ -174,13 +173,11 @@ describe('TESTING ROUTER PROFILE', () => {
       garage.description = faker.lorem.words(10);
       garage.attachments.push(attachment._id);
       let response;
-      console.log('%%%%%%%% PUTing garage', JSON.stringify(garage, null, 2));
       try {
         response = await superagent.put(`${apiUrl}/garages`)
           .query({ id: garage._id.toString() })
           .authBearer(token)
           .send(garage);
-        console.log('%%%%%%% post garage PUT body:', JSON.stringify(response.body, null, 2));
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
       }
