@@ -36,7 +36,7 @@ accountSchema.methods.verifyPasswordPromise = function verifyPasswordPromise(pas
       return result;
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`);
+      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`, { expose: false });
     });
 };
 
@@ -47,7 +47,7 @@ accountSchema.methods.createTokenPromise = function createTokenPromise() {
       return jsonWebToken.sign({ accountId: updatedAccount._id, tokenSeed: updatedAccount.tokenSeed }, process.env.SECRET);
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR SAVING ACCOUNT or ERROR WITH JWT: ${JSON.stringify(err)}`);
+      throw new HttpErrors(500, `ERROR SAVING ACCOUNT or ERROR WITH JWT: ${JSON.stringify(err)}`, { expose: false });
     });
 };
 

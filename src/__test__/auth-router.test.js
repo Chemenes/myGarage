@@ -91,14 +91,14 @@ describe('basic AUTH router login (get) tests', () => {
   });
 
 
-  test('GET 400 to api/login for good username, bad password', async () => {
+  test('GET 401 to api/login for good username, bad password', async () => {
     const mockData = await createAccountMockPromise();
     try {
       const response = await superagent.get(`${apiUrl}/login`)
         .auth(mockData.account.username, 'nottheirpassword');
       expect(response).toEqual('Unexpected good status from bad password test');
     } catch (err) {
-      expect(err.status).toEqual(400);
+      expect(err.status).toEqual(401);
     }
   });
 
