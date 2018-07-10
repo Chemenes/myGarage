@@ -10,7 +10,7 @@ bearerAuth(superagent);
 
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
 
-describe('TESTING ROUTER PROFILE', () => {
+describe('TESTING VEHICLE ROUTER', () => {
   let mockData;
   let token;
   let garage;
@@ -183,13 +183,11 @@ describe('TESTING ROUTER PROFILE', () => {
       vehicle.model = faker.lorem.words(2);
       vehicle.attachments.push(attachment._id);
       let response;
-      console.log('%%%%%%%% PUTing vehicle', JSON.stringify(vehicle, null, 2));
       try {
         response = await superagent.put(`${apiUrl}/vehicles`)
           .query({ id: vehicle._id.toString() })
           .authBearer(token)
           .send(vehicle);
-        console.log('%%%%%%% post vehicle PUT body:', JSON.stringify(response.body, null, 2));
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
       }

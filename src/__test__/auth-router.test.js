@@ -1,16 +1,18 @@
 import superagent from 'superagent';
+import bearerAuth from 'superagent-auth-bearer';
 import faker from 'faker';
 
 import { startServer, stopServer } from '../lib/server';
 import { createAccountMockPromise, removeAccountMockPromise } from './lib/account-mock';
 
+bearerAuth(superagent);
 
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
 beforeAll(startServer);
 afterAll(stopServer);
 beforeEach(removeAccountMockPromise);
 
-describe('AUTH router', () => {
+describe('AUTH router signup (post) tests', () => {
   test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
@@ -55,7 +57,7 @@ describe('AUTH router', () => {
   });
 });
 
-describe('basic AUTH router Get tests', () => {
+describe('basic AUTH router login (get) tests', () => {
   test('GET 200 to api/login for successful login and receipt of a TOKEN', async () => {
     const mockData = await createAccountMockPromise();
     try {
@@ -89,14 +91,14 @@ describe('basic AUTH router Get tests', () => {
   });
 
 
-  test('GET 400 to api/login for good username, bad password', async () => {
+  test('GET 401 to api/login for good username, bad password', async () => {
     const mockData = await createAccountMockPromise();
     try {
       const response = await superagent.get(`${apiUrl}/login`)
         .auth(mockData.account.username, 'nottheirpassword');
       expect(response).toEqual('Unexpected good status from bad password test');
     } catch (err) {
-      expect(err.status).toEqual(400);
+      expect(err.status).toEqual(401);
     }
   });
 
@@ -108,6 +110,113 @@ describe('basic AUTH router Get tests', () => {
       expect(response).toEqual('Unexpected good status from bad username test');
     } catch (err) {
       expect(err.status).toEqual(400);
+    }
+  });
+});
+
+describe('AUTH-ROUTER update (put) tests', () => {
+  test('200 update existing account email address', async () => {
+    const mockData = await createAccountMockPromise();
+
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/email`)
+        .authBearer(mockData.token)
+        .send({ email: 'newEmail@newEmail.com' });
+    } catch (err) {
+      expect(err).toEqual('Unexpected error returned on valid udpate');
+    }
+    expect(response.status).toEqual(200);
+  });
+
+  test('200 update existing account password', async () => {
+    const mockData = await createAccountMockPromise();
+
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/pw`)
+        .authBearer(mockData.token)
+        .send({ pw: 'newPassword' });
+    } catch (err) {
+      expect(err).toEqual('Unexpected error returned on valid udpate');
+    }
+    expect(response.status).toEqual(200);
+
+    // now try logging in with the new password...
+    try {
+      response = await superagent.get(`${apiUrl}/login`)
+        .auth(mockData.account.username, 'newPassword'); 
+      expect(response.status).toEqual(200);
+      expect(response.body.token).toBeTruthy();
+    } catch (err) {
+      expect(err).toEqual('Login with new password failed!');
+    }
+  });
+
+  test('400 update email bad request', async () => {
+    const mockData = await createAccountMockPromise();
+
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/email`)
+        .authBearer(mockData.token)
+        .send({ EmL: 'newaddr@mail.com' });
+      expect(response).toEqual('Unexpected success on bad email update request');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
+  });
+
+  test('404 update email bad url', async () => {
+    const mockData = await createAccountMockPromise();
+    try {
+      await superagent.put(`${apiUrl}/account/emailaddress`)
+        .authBearer(mockData.token)
+        .send({ email: 'newaddr@mail.com' });
+      expect(true).toEqual('Unexpected success on bad email update request');
+    } catch (err) {
+      expect(err.status).toEqual(404);
+    }
+  });
+
+  test('400 update pw bad request', async () => {
+    const mockData = await createAccountMockPromise();
+
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/pw`)
+        .authBearer(mockData.token)
+        .send({ password: 'newpassword' });
+      expect(response).toEqual('Unexpected success on bad email update request');
+    } catch (err) {
+      expect(err.status).toEqual(400);
+    }
+  });
+
+  test('401 update pw bad token', async () => {
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/pw`)
+        .authBearer('badtoken')
+        .send({ password: 'newpassword' });
+      expect(response).toEqual('Unexpected success on bad email update request');
+    } catch (err) {
+      expect(err.status).toEqual(401);
+    }
+  });
+
+  test('409 update email conflict', async () => {
+    const mockData1 = await createAccountMockPromise();
+    const mockData2 = await createAccountMockPromise();
+
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/account/email`)
+        .authBearer(mockData1.token)
+        .send({ email: mockData2.account.email });
+      expect(response).toEqual('Unexpected success on bad email update request');
+    } catch (err) {
+      expect(err.status).toEqual(409);
     }
   });
 });

@@ -53,19 +53,14 @@ maintenanceLogRouter.put('/api/maintenance-logs', bearerAuthMiddleware, (request
 
   if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT MAINT LOG ROUTER: Missing request body', { expose: false }));
   
-  console.log('~~~~~~~~~~~ MAINT LOG PUT request.query.id', request.query.id);
-  console.log('~~~~~~~~~~~ request.body', request.body);
-
   MaintenanceLog.init()
     .then(() => {
       return MaintenanceLog.findOneAndUpdate({ _id: request.query.id }, request.body);
     })
     .then((log) => {
-      console.log('~~~~~~~~~~~ returned from update:', log);
       return MaintenanceLog.findOne(log._id);
     })
     .then((log) => {
-      console.log('~~~~~~~~~~~ returning', log);
       response.json(log);
     })
     .catch(next);

@@ -33,15 +33,10 @@ accountSchema.methods.verifyPasswordPromise = function verifyPasswordPromise(pas
   console.log('######### verify password:', password);
   return bcrypt.compare(password, this.passwordHash)
     .then((result) => {
-      // result is just a boolean letting us know if the plain text password received equals the hashed password
-      // if (!result) {
-      //   // 401 is the error code for unauthorized access
-      //   throw new HttpErrors(401, 'ACCOUNT MODEL: incorrect data');
-      // }
       return result;
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`);
+      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`, { expose: false });
     });
 };
 
@@ -52,7 +47,7 @@ accountSchema.methods.createTokenPromise = function createTokenPromise() {
       return jsonWebToken.sign({ accountId: updatedAccount._id, tokenSeed: updatedAccount.tokenSeed }, process.env.SECRET);
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR SAVING ACCOUNT or ERROR WITH JWT: ${JSON.stringify(err)}`);
+      throw new HttpErrors(500, `ERROR SAVING ACCOUNT or ERROR WITH JWT: ${JSON.stringify(err)}`, { expose: false });
     });
 };
 
@@ -61,7 +56,6 @@ const skipInit = process.env.NODE_ENV === 'development';
 const Account = mongoose.model('Account', accountSchema, 'accounts', skipInit);
 
 Account.create = (username, email, password) => {
-  console.log('$$$$$$$$ Account.create password:', password);
   return bcrypt.hash(password, HASH_ROUNDS)
     .then((passwordHash) => {
       password = null; /*eslint-disable-line*/

@@ -29,13 +29,7 @@ vehicleRouter.post('/api/vehicles', bearerAuthMiddleware, (request, response, ne
 
 vehicleRouter.get('/api/vehicles', bearerAuthMiddleware, (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(400, 'GET VEHICLE ROUTER: invalid request', { expose: false }));
-  // if (!Object.keys(request.query).length === 0) {
-  //   return Vehicle.find().populate()
-  //     .then((vehicles) => {
-  //       return response.json(vehicles);
-  //     })
-  //     .catch(next);
-  // }
+
   if (!request.query.id) return next(new HttpErrors(400, 'GET VEHICLE ROUTER: bad query', { expose: false }));
 
   Vehicle.findOne({ _id: request.query.id })
@@ -55,19 +49,14 @@ vehicleRouter.put('/api/vehicles', bearerAuthMiddleware, (request, response, nex
 
   if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT VEHICLE ROUTER: Missing request body', { expose: false }));
   
-  console.log('~~~~~~~~~~~ VEHICLE PUT request.query.id', request.query.id);
-  console.log('~~~~~~~~~~~ request.body', request.body);
-
   Vehicle.init()
     .then(() => {
       return Vehicle.findOneAndUpdate({ _id: request.query.id }, request.body);
     })
     .then((vehicle) => {
-      console.log('~~~~~~~~~~~ returned from update:', vehicle);
       return Vehicle.findOne(vehicle._id);
     })
     .then((vehicle) => {
-      console.log('~~~~~~~~~~~ returning', vehicle);
       response.json(vehicle);
     })
     .catch(next);

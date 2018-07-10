@@ -56,19 +56,14 @@ profileRouter.put('/api/profiles', bearerAuthMiddleware, (request, response, nex
 
   if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT PROFILE ROUTER: Missing request body', { expose: false }));
   
-  console.log('~~~~~~~~~~~ PROFILE PUT request.query.id', request.query.id);
-  console.log('~~~~~~~~~~~ request.body', request.body);
-
   Profile.init()
     .then(() => {
       return Profile.findOneAndUpdate({ _id: request.query.id }, request.body);
     })
     .then((profile) => {
-      console.log('~~~~~~~~~~~ returned from update:', profile);
       return Profile.findOne(profile._id);
     })
     .then((profile) => {
-      console.log('~~~~~~~~~~~ returning', profile);
       response.json(profile);
     })
     .catch(next);
@@ -76,7 +71,6 @@ profileRouter.put('/api/profiles', bearerAuthMiddleware, (request, response, nex
 });
 
 profileRouter.delete('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  console.log('~~~~~~~~~~~ PROFILE DELETE request.query.id', request.query.id);
   if (!request.account) return next(new HttpErrors(400, 'DELETE PROFILE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE PROFILE ROUTER: bad query', { expose: false }));

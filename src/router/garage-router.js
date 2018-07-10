@@ -49,19 +49,14 @@ garageRouter.put('/api/garages', bearerAuthMiddleware, (request, response, next)
 
   if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: Missing request body', { expose: false }));
   
-  console.log('~~~~~~~~~~~ GARAGE PUT request.query.id', request.query.id);
-  console.log('~~~~~~~~~~~ request.body', request.body);
-
   Garage.init()
     .then(() => {
       return Garage.findOneAndUpdate({ _id: request.query.id }, request.body);
     })
     .then((garage) => {
-      console.log('~~~~~~~~~~~ returned from update:', garage);
       return Garage.findOne(garage._id);
     })
     .then((garage) => {
-      console.log('~~~~~~~~~~~ returning', garage);
       response.json(garage);
     })
     .catch(next);
