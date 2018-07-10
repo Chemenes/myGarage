@@ -27,21 +27,42 @@ garageRouter.post('/api/garages', bearerAuthMiddleware, (request, response, next
   return undefined;
 });
 
-garageRouter.get('/api/garages/:id?', bearerAuthMiddleware, (request, response, next) => {
+garageRouter.get('/api/garages', bearerAuthMiddleware, (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(400, 'GET GARAGE ROUTER: invalid request', { expose: false }));
-  // if (!Object.keys(request.query).length === 0) {
-  //   return Garage.find().populate()
-  //     .then((garages) => {
-  //       return response.json(garages);
-  //     })
-  //     .catch(next);
-  // }
+
   if (!request.query.id) return next(new HttpErrors(400, 'GET GARAGE ROUTER: bad query', { expose: false }));
 
   Garage.findOne({ _id: request.query.id })
     .then((garage) => {
       if (!garage) return next(new HttpErrors(400, 'GARAGE ROUTER GET: garage not found', { expose: false }));
       return response.json(garage);
+    })
+    .catch(next);
+  return undefined;
+});
+
+// update route
+garageRouter.put('/api/garages', bearerAuthMiddleware, (request, response, next) => {
+  if (!request.account) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: invalid request', { expose: false }));
+
+  if (!request.query.id) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: bad query', { expose: false }));
+
+  if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: Missing request body', { expose: false }));
+  
+  console.log('~~~~~~~~~~~ GARAGE PUT request.query.id', request.query.id);
+  console.log('~~~~~~~~~~~ request.body', request.body);
+
+  Garage.init()
+    .then(() => {
+      return Garage.findOneAndUpdate({ _id: request.query.id }, request.body);
+    })
+    .then((garage) => {
+      console.log('~~~~~~~~~~~ returned from update:', garage);
+      return Garage.findOne(garage._id);
+    })
+    .then((garage) => {
+      console.log('~~~~~~~~~~~ returning', garage);
+      response.json(garage);
     })
     .catch(next);
   return undefined;

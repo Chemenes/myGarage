@@ -4,6 +4,7 @@ import faker from 'faker';
 import { startServer, stopServer } from '../lib/server';
 import { createProfileMockPromise } from './lib/profile-mock';
 import { createGarageMockPromise, removeAllResources } from './lib/garage-mock';/*eslint-disable-line*/
+import { createVehicleMockPromise } from './lib/vehicle-mock';
 import logger from '../lib/logger';
 
 bearerAuth(superagent);
@@ -152,6 +153,99 @@ describe('TESTING ROUTER PROFILE', () => {
           .query({ EYEDEE: garage.profileId })
           .authBearer(token);
         expect(response.status).toEqual('We should not reach this code GET 404');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+  });
+
+  describe('PUT GARAGES ROUTE TESTING', () => {
+    test('PUT 200 successful update of existing garage', async () => {
+      let garage;
+      let attachment;
+      try {
+        let mock = await createGarageMockPromise();
+        garage = mock.garage; /*eslint-disable-line*/
+        mock = await createGarageMockPromise();
+        attachment = mock.attachment; /*eslint-disable-line*/
+      } catch (err) {
+        throw err;
+      }
+      garage.description = faker.lorem.words(10);
+      garage.attachments.push(attachment._id);
+      let response;
+      console.log('%%%%%%%% PUTing garage', JSON.stringify(garage, null, 2));
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .query({ id: garage._id.toString() })
+          .authBearer(token)
+          .send(garage);
+        console.log('%%%%%%% post garage PUT body:', JSON.stringify(response.body, null, 2));
+      } catch (err) {
+        expect(err).toEqual('POST 200 test that should pass');
+      }
+      expect(response.status).toEqual(200);
+      expect(response.body.profileId).toEqual(garage.profileId.toString());
+      expect(response.body.description).toEqual(garage.description);
+      expect(response.body.attachments).toHaveLength(2); // one added by garage-mock
+    });
+
+    test('PUT 200 successful add vehicle to existing garage', async () => {
+      let garage;
+      let attachment;
+      let vehicle;
+      try {
+        let mock = await createGarageMockPromise();
+        garage = mock.garage; /*eslint-disable-line*/
+        mock = await createGarageMockPromise();
+        attachment = mock.attachment; /*eslint-disable-line*/
+        mock = await createVehicleMockPromise();
+        vehicle = mock.vehicle; /*eslint-disable-line*/
+      } catch (err) {
+        throw err;
+      }
+      garage.attachments.push(attachment._id);
+      garage.vehicles.push(vehicle._id);
+
+      let response;
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .query({ id: garage._id.toString() })
+          .authBearer(token)
+          .send(garage);
+      } catch (err) {
+        expect(err).toEqual('POST 200 test that should pass');
+      }
+      expect(response.status).toEqual(200);
+      expect(response.body.profileId).toEqual(garage.profileId.toString());
+      expect(response.body.attachments).toHaveLength(2);
+      expect(response.body.vehicles).toHaveLength(1);
+      expect(response.body.vehicles[0]).toEqual(vehicle._id.toString());
+    });
+
+    test('PUT 404 garage not foud', async () => {
+      let response;
+      const garage = await createGarageMockPromise();
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .query({ id: '123432123551234234' })
+          .authBearer(token)
+          .send(garage);
+        expect(response).toEqual('PUT should have returned 404...');
+      } catch (err) {
+        expect(err.status).toEqual(404);
+      }
+    });
+
+    test('PUT 400 bad request', async () => {
+      let response;
+      const mock = await createGarageMockPromise();
+      const garage = mock.profile; /*eslint-disable-line*/
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .query({ id: garage._id.toString() })
+          .authBearer(token);
+        expect(response).toEqual('We should have failed with a 400');
       } catch (err) {
         expect(err.status).toEqual(400);
       }
