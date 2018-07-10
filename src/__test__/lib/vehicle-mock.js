@@ -1,6 +1,6 @@
 import faker from 'faker';
 import Vehicle from '../../model/vehicle';
-import { createGarageMockPromise } from '../../model/garage';
+import { createGarageMockPromise } from './garage-mock';
 
 const createVehicleMockPromise = async () => {
   const mockData = {};
