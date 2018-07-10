@@ -1,9 +1,13 @@
 import { Router } from 'express';
 import HttpErrors from 'http-errors';
+import bcrypt from 'bcrypt';
 import Account from '../model/account';
 import basicAuthMiddleware from '../lib/middleware/basic-auth-middleware';
 import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
+// import { http } from 'winston';
+
+const HASH_ROUNDS = 4;
 
 const authRouter = new Router();
 
@@ -26,24 +30,47 @@ authRouter.post('/api/signup', (request, response, next) => {
 });
 
 // update account info requires bearer token
-authRouter.put('/api/signup', bearerAuthMiddleware, (request, response, next) => {
+authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response, next) => {
   if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: bad request', { expose: false }));
 
+  if (!['email', 'pw'].includes(request.params.update)) return next(new HttpErrors(404, `AUTH-ROUTER: route not registered: /api/update/${request.params.update}`));
+
+  if (request.params.update === 'email' && !request.body.email) return next(new HttpErrors(400, 'AUTH-ROUTER: bad request: missing new email address', { expose: false }));
+
+  if (request.params.update === 'pw' && !request.body.pw) return next(new HttpErrors(400, 'AUTH-ROUTER: bad request: missing new password', { expose: false }));
+
+  if (request.params.update === 'email') {
+    Account.init()
+      .then(() => {
+        const newAccount = new Account(request.account);
+
+        newAccount.email = request.body.email;
+
+        return Account.findByIdAndUpdate(newAccount._id, newAccount);
+      })
+      .then((result) => {
+        if (!result) return next(new HttpErrors(404, 'AUTH-ROUTER: account ID not found', { expose: false }));
+        return response.sendStatus(200);
+      })
+      .catch(next);
+    return undefined;
+  } // else update === pw
   Account.init()
-    .then(() => {
-      // should have a request body with updated username, password or email
-      const keys = Object.keys(request.body);
-      const newAccount = new Account(request.account);
-      console.log('>>>>>> request.account', request.account);
-      console.log('>>>>>> newAccount', newAccount);
-      console.log('>>>>>> request.body', request.body);
-      for (let i = 0; i < keys.length; i++) {
-        if (request.account.hasOwnProperty(keys[i])) {
-          newAccount[keys[i]] = request.body[keys[i]];
-        }
-      }
-      console.log('>>>>>> newAccount post update', newAccount);
-    });
+    .then(async () => {
+      const newAccount = new Account(request.account);    
+
+      const hash = await bcrypt.hash(request.body.pw, HASH_ROUNDS);
+
+      newAccount.passwordHash = hash;
+
+      return Account.findByIdAndUpdate(newAccount._id, newAccount);
+    })
+    .then((result) => {
+      if (!result) return next(new HttpErrors(404, 'AUTH-ROUTER: account ID not found', { expose: false }));
+      return response.sendStatus(200);
+    })
+    .catch(next);
+  return undefined;
 });
 
 authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
