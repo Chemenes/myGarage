@@ -395,25 +395,57 @@ Errors are returned for bad requests (400), attachment entry not found (404) and
 ### PUT (Update)
 #### PUT /api/accounts/email
 
+This route is used to update a user's email address.  The body of the request must be a JSON string of the form:
+```
+{
+    "email": "newEmail@address.com" 
+}
+```
+The route responds with 200 on success, 400 on bad request, 401 on bad authorization and 409 if email already exists in the database.
+
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### PUT /api/accounts/pw
+
+This route is used to update a user's password. The body of the request is a JSON string:
+```
+{
+    "pw": "newPassword"
+}
+```
+The route responds with 200 on success, 400 on bad request, 401 on bad authorization and 409 if email already exists in the database.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### PUT /api/profiles
 
+To update an existing profile, first GET the profile, then change whichever values need updating. Then use this route to send the updated profile back to the database. The route takes a query string of the form ?id=profileId. The body of the request should be the JSON stringified profile object.  On success you will get back the updated profile object as a JSON string.
+
+Status 200 is returned on success, 400 for bad request, 401 for bad authentication.
+
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### PUT /api/garages
+
+To update an existing garage, first GET the garage, then change whichever values need updating. Then use this route to send the updated garage back to the database. The route takes a query string of the form ?id=garageId. The body of the request should be the JSON stringified garage object.  On success you will get back the updated garage object as a JSON string.
+
+Status 200 is returned on success, 400 for bad request, 401 for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### PUT /api/vehicles
 
+To update an existing vehicle, first GET the vehicle, then change whichever values need updating. Then use this route to send the updated vehicle back to the database. The route takes a query string of the form ?id=vehicleId. The body of the request should be the JSON stringified vehicle object.  On success you will get back the updated vehicle object as a JSON string.
+
+Status 200 is returned on success, 400 for bad request, 401 for bad authentication.
+
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### PUT /api/maintenance-logs
+
+To update an existing maintenance-log, first GET the maintenance-log, then change whichever values need updating. Then use this route to send the updated maintenance-log back to the database. The route takes a query string of the form ?id=maintenance-logId. The body of the request should be the JSON stringified maintenance-log object.  On success you will get back the updated maintenance-log object as a JSON string.
+
+Status 200 is returned on success, 400 for bad request, 401 for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
