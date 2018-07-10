@@ -2,6 +2,7 @@ import { Router } from 'express';
 import HttpErrors from 'http-errors';
 import Account from '../model/account';
 import basicAuthMiddleware from '../lib/middleware/basic-auth-middleware';
+import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
 
 const authRouter = new Router();
@@ -24,8 +25,29 @@ authRouter.post('/api/signup', (request, response, next) => {
     .catch(next);
 });
 
+// update account info requires bearer token
+authRouter.put('/api/signup', bearerAuthMiddleware, (request, response, next) => {
+  if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: bad request', { expose: false }));
+
+  Account.init()
+    .then(() => {
+      // should have a request body with updated username, password or email
+      const keys = Object.keys(request.body);
+      const newAccount = new Account(request.account);
+      console.log('>>>>>> request.account', request.account);
+      console.log('>>>>>> newAccount', newAccount);
+      console.log('>>>>>> request.body', request.body);
+      for (let i = 0; i < keys.length; i++) {
+        if (request.account.hasOwnProperty(keys[i])) {
+          newAccount[keys[i]] = request.body[keys[i]];
+        }
+      }
+      console.log('>>>>>> newAccount post update', newAccount);
+    });
+});
+
 authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: invalid request'));
+  if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: invalid request', { expose: false }));
   Account.init()
     .then(() => {
       return request.account.createTokenPromise();
