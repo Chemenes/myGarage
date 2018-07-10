@@ -227,4 +227,52 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
   });
+
+  describe('DELETE VEHICLE ROUTE TESTING', () => {
+    test('DELETE 200 success', async () => {
+      const mock = await
+      createVehicleMockPromise();
+      const vehicle = mock.vehicle;/*eslint-disable-line*/
+      
+      console.log('$$$$$$$ Delete', vehicle._id);
+      let response;
+      try {
+        response = await
+        superagent.delete(`${apiUrl}/vehicles`)
+          .query({
+            id:
+          vehicle._id.toString(),
+          })
+          .authBearer(token);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error on delete test');
+      }
+      console.log('$$$$$ response status', response.status);
+    });
+
+
+    test('DELETE 404 not found', async () => {
+      let response;
+      try {
+        response = await
+        superagent.delete(`${apiUrl}/vehicles`)
+          .query({ id: '3904209384290' })
+          .authBearer(token);
+        expect(response).toEqual('DELETE 404 expected but not received');
+      } catch (err) {
+        expect(err.status).toEqual(404);
+      }
+    });
+
+    test.only('DELETE 400 bad request', async () => {
+      try {
+        await superagent.delete(`${apiUrl}/vehicles`)
+          .authBearer(token);
+        expect(true).toEqual('DELETE 400 missing query unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+  });
 });
