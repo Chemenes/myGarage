@@ -30,7 +30,6 @@ const accountSchema = mongoose.Schema({
 }, { timestamps: true });
 
 accountSchema.methods.verifyPasswordPromise = function verifyPasswordPromise(password) {
-  console.log('######### verify password:', password);
   return bcrypt.compare(password, this.passwordHash)
     .then((result) => {
       return result;

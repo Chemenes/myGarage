@@ -36,7 +36,6 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .authBearer(token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile);
-        console.log('####### tst body', response.body);
         expect(response.status).toEqual(200);
         expect(response.body.originalName).toEqual('r1200.jpg');
         expect(response.body._id).toBeTruthy();
@@ -76,7 +75,6 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   describe('GET ROUTES to /api/attachments', () => {
     test('200 GET /api/attachments for successful fetching', async () => {
       try {
-        console.log('$$$$$$$$ attachment', attachment);
         const response = await superagent.get(`${apiUrl}/${attachment._id}`)
           .authBearer(token);
         expect(response.status).toEqual(200);
