@@ -27,6 +27,7 @@ export default (request, response, next) => {
       return Account.findOne({ _id: decryptedToken.accountId });
     })
     .then((account) => {
+      console.log('$$$$$$$$ BAMW account', account);
       if (!account) return next(new HttpErrors(404, 'BEARER AUTH - no account found'));
       request.account = account;
       return Profile.findOne({ accountId: account._id });
