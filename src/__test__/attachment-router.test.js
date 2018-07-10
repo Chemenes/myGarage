@@ -122,7 +122,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
     test('DELETE 400 bad request', async () => {
       try {
-        await superagent.delete(`${apiUrl}/attachments`)
+        await superagent.delete(`${apiUrl}`)
           .authBearer(token);
         expect(true).toEqual('DELETE 400 missing query unexpected success');
       } catch (err) {
