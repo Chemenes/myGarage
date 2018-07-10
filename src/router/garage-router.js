@@ -3,6 +3,9 @@ import HttpErrors from 'http-errors';
 import Garage from '../model/garage';
 import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
+import Attachment from '../model/attachment';
+import MaintenanceLog from '../model/maintenance-log';
+import Vehicle from '../model/vehicle';
 
 const garageRouter = new Router();
 
@@ -58,6 +61,26 @@ garageRouter.put('/api/garages', bearerAuthMiddleware, (request, response, next)
     })
     .then((garage) => {
       response.json(garage);
+    })
+    .catch(next);
+  return undefined;
+});
+
+garageRouter.delete('/api/garages', bearerAuthMiddleware, (request, response, next) => {
+  if (!request.account) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
+
+  if (!request.query.id) return next(new HttpErrors(400, 'DELETE GARAGE ROUTER: bad query', { expose: false }));
+
+  Garage.init()
+    .then(() => {
+      return Garage.remove({ profileId: request.query.id });
+    })
+    .then(() => {
+      return Attachment.remove({ profileId: request.query.id });
+    })
+    .then(() => {
+      MaintenanceLog.remove({ profileId: request.query.id });
+      return response.sendStatus(200);
     })
     .catch(next);
   return undefined;

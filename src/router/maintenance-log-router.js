@@ -3,6 +3,7 @@ import HttpErrors from 'http-errors';
 import MaintenanceLog from '../model/maintenance-log';
 import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
+import Attachment from '../model/attachment';
 
 const maintenanceLogRouter = new Router();
 
@@ -66,5 +67,22 @@ maintenanceLogRouter.put('/api/maintenance-logs', bearerAuthMiddleware, (request
     .catch(next);
   return undefined;
 });
+
+maintenanceLogRouter.delete('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
+  if (!request.account) return next(new HttpErrors(400, 'DELETE MAINTENANCE-LOG ROUTER: invalid request', { expose: false }));
+
+  if (!request.query.id) return next(new HttpErrors(400, 'DELETE MAINTENANCE ROUTER: bad query', { expose: false }));
+
+  MaintenanceLog.init()
+    .then(() => {
+      return MaintenanceLog.remove({ _id: request.query.id });
+    })
+    .then(() => {
+      return Attachment.remove({ vehicleId: request.query.id });
+    })
+    .catch(next);
+  return undefined;
+});
+
 
 export default maintenanceLogRouter;
