@@ -5,7 +5,7 @@ import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
 import logger from '../lib/logger';
 import Attachment from '../model/attachment';
 import MaintenanceLog from '../model/maintenance-log';
-import Vehicle from '../model/vehicle';
+
 
 const garageRouter = new Router();
 

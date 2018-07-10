@@ -1,7 +1,6 @@
 import superagent from 'superagent';
 import bearerAuth from 'superagent-auth-bearer';
 import faker from 'faker';
-import { create } from 'domain';
 import { startServer, stopServer } from '../lib/server';
 import { createMaintenanceLogMockPromise } from './lib/maintenance-log-mock';
 import { createVehicleMockPromise, removeAllResources } from './lib/vehicle-mock';/*eslint-disable-line*/
