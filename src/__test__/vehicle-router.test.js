@@ -167,4 +167,64 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
   });
+
+  describe('PUT VEHICLES ROUTE TESTING', () => {
+    test('PUT 200 successful update of existing vehicle', async () => {
+      let vehicle;
+      let attachment;
+      try {
+        let mock = await createVehicleMockPromise();
+        vehicle = mock.vehicle; /*eslint-disable-line*/
+        mock = await createGarageMockPromise();
+        attachment = mock.attachment; /*eslint-disable-line*/
+      } catch (err) {
+        throw err;
+      }
+      vehicle.model = faker.lorem.words(2);
+      vehicle.attachments.push(attachment._id);
+      let response;
+      console.log('%%%%%%%% PUTing vehicle', JSON.stringify(vehicle, null, 2));
+      try {
+        response = await superagent.put(`${apiUrl}/vehicles`)
+          .query({ id: vehicle._id.toString() })
+          .authBearer(token)
+          .send(vehicle);
+        console.log('%%%%%%% post vehicle PUT body:', JSON.stringify(response.body, null, 2));
+      } catch (err) {
+        expect(err).toEqual('POST 200 test that should pass');
+      }
+      expect(response.status).toEqual(200);
+      expect(response.body.profileId).toEqual(vehicle.profileId.toString());
+      expect(response.body.model).toEqual(vehicle.model);
+      expect(response.body.attachments).toHaveLength(1);
+    });
+
+    test('PUT 404 vehicle not foud', async () => {
+      let response;
+      const vehicle = await createVehicleMockPromise();
+      try {
+        response = await superagent.put(`${apiUrl}/vehicles`)
+          .query({ id: '123432123551234234' })
+          .authBearer(token)
+          .send(vehicle);
+        expect(response).toEqual('PUT should have returned 404...');
+      } catch (err) {
+        expect(err.status).toEqual(404);
+      }
+    });
+
+    test('PUT 400 bad request', async () => {
+      let response;
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle; /*eslint-disable-line*/
+      try {
+        response = await superagent.put(`${apiUrl}/vehicles`)
+          .query({ id: vehicle._id.toString() })
+          .authBearer(token);
+        expect(response).toEqual('We should have failed with a 400');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+  });
 });
