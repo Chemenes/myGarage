@@ -1,6 +1,6 @@
 import faker from 'faker';
 import Vehicle from '../../model/vehicle';
-import { createGarageMockPromise } from '../../model/garage';
+import { createGarageMockPromise } from './garage-mock';
 
 const createVehicleMockPromise = async () => {
   const mockData = {};
@@ -8,27 +8,24 @@ const createVehicleMockPromise = async () => {
   const mockGarageData = await createGarageMockPromise();
   mockData.garage = mockGarageData.garage;
 
-  const originalRequest = {
+  const vehicle = await new Vehicle({
     name: faker.name.firstName(),
     make: faker.name.firstName(),
     model: faker.name.firstName(),
     type: 'car',
     garageId: mockGarageData.garage._id,
-    accountId: mockGarageData.account._id,
-  };
+    profileId: mockGarageData.profile._id,
+  }).save();
 
-  const vehicle = await Vehicle.create(originalRequest.username, originalRequest.email, originalRequest.password);
-  mockData.originalRequest = originalRequest;
   mockData.vehicle = vehicle;
 
-  const token = await vehicle.createTokenPromise();
-  mockData.token = token; 
-
-  const foundVehicle = await Vehicle.findById(mockData.vehicle._id);
-  mockData.vehicle = foundVehicle;
   return mockData;
 };
 
-const removeVehicleMockPromise = () => Vehicle.remove({});
+const removeVehicleMockPromise = () => {
+  return Promise.all([
+    Vehicle.remove(),
+  ]);
+};
 
 export { createVehicleMockPromise, removeVehicleMockPromise };
