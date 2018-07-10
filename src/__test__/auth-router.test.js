@@ -1,16 +1,18 @@
 import superagent from 'superagent';
+import bearerAuth from 'superagent-auth-bearer';
 import faker from 'faker';
 
 import { startServer, stopServer } from '../lib/server';
 import { createAccountMockPromise, removeAccountMockPromise } from './lib/account-mock';
 
+bearerAuth(superagent);
 
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
 beforeAll(startServer);
 afterAll(stopServer);
 beforeEach(removeAccountMockPromise);
 
-describe('AUTH router', () => {
+describe('AUTH router signup tests', () => {
   test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),
@@ -55,7 +57,7 @@ describe('AUTH router', () => {
   });
 });
 
-describe('basic AUTH router Get tests', () => {
+describe('basic AUTH router login tests', () => {
   test('GET 200 to api/login for successful login and receipt of a TOKEN', async () => {
     const mockData = await createAccountMockPromise();
     try {
@@ -109,5 +111,20 @@ describe('basic AUTH router Get tests', () => {
     } catch (err) {
       expect(err.status).toEqual(400);
     }
+  });
+});
+
+describe('AUTH-ROUTER PUT (update) tests', () => {
+  test.only('200 update existing account email address', async () => {
+    const mockData = await createAccountMockPromise();
+    let response;
+    try {
+      response = await superagent.put(`${apiUrl}/signup`)
+        .authBearer(mockData.token)
+        .send(mockData.account);
+    } catch (err) {
+      expect(err).toEqual('Unexpected error returned on valid udpate');
+    }
+    expect(response.status).toEqual(200);
   });
 });
