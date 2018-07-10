@@ -13,6 +13,7 @@ import profileRouter from '../router/profile-router';
 import attachmentRouter from '../router/attachment-router';
 import garageRouter from '../router/garage-router';
 import vehicleRouter from '../router/vehicle-router';
+import maintenanceLogRouter from '../router/maintenance-log-router';
 
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(authRouter);
 app.use(profileRouter);
 app.use(garageRouter);
 app.use(vehicleRouter);
+app.use(maintenanceLogRouter);
 app.use(attachmentRouter);
 
 app.all('*', (request, response) => {

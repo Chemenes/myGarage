@@ -7,6 +7,8 @@ const createVehicleMockPromise = async () => {
 
   const mockGarageData = await createGarageMockPromise();
   mockData.garage = mockGarageData.garage;
+  mockData.profile = mockGarageData.profile;
+  mockData.token = mockGarageData.token;
 
   const vehicle = await new Vehicle({
     name: faker.name.firstName(),
