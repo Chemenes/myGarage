@@ -12,7 +12,7 @@ const createAttachmentMockPromise = async () => {
   mockData.account = mockProfileData.account;
   mockData.profile = mockProfileData.profile;
   mockData.token = mockProfileData.token;
-
+  
   const attachment = await new Attachment({
     originalName: faker.system.fileName(),
     mimeType: 'mime/type',
@@ -21,9 +21,10 @@ const createAttachmentMockPromise = async () => {
     awsKey: 'multer-hashed-filename.originalName',
     profileId: mockData.profile._id,
   }).save();
-
+  
   mockData.attachment = attachment;
-
+  
+  // console.log('$$$$$$ attachMOCK returning', JSON.stringify(mockData, null, 2));
   return mockData;
 };
 

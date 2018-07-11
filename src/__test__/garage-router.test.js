@@ -35,7 +35,6 @@ describe('TESTING ROUTER PROFILE', () => {
         name: faker.name.firstName(),
         description: faker.lorem.words(20),
         location: faker.name.firstName(),
-        profileId: profile._id,
       };
       let response;
       

@@ -31,13 +31,14 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
 });
 
 profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request', { expose: false }));
+  console.log('$$$$$$ request.profile', request.profile);
+  if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request. Not logged in.', { expose: false }));
 
-  if (!request.query.id) return next(new HttpErrors(400, 'GET PROFILE ROUTER: bad query', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));
 
   Profile.init()
     .then(() => {
-      Profile.findOne({ _id: request.query.id })
+      Profile.findOne({ _id: request.profile._id.toString() })
         .then((profile) => {
           if (!profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found', { expose: false }));
           return response.json(profile);

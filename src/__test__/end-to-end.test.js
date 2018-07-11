@@ -103,7 +103,6 @@ describe('End-To-End myGarage Test', () => {
       name: faker.lorem.words(2),
       description: faker.lorem.words(8),
       location: `${faker.address.city()}, ${faker.address.state()}`,
-      profileId: profileResult._id,
     };
 
     let garageResult;
@@ -203,7 +202,7 @@ describe('End-To-End myGarage Test', () => {
 
       response = await superagent.post(`${apiUrl}/maintenance-logs`)
         .authBearer(loginResult.token)
-        .query({ v: vehicles[1]._id })
+        .query({ vehicle: vehicles[1]._id })
         .send(maintenanceLog);
       logs[1] = response.body;
 
@@ -295,7 +294,7 @@ describe('End-To-End myGarage Test', () => {
         .authBearer(loginResult.token)
         .field('filename', 'R1200.JPG')
         .attach('attachment', testFile)
-        .query({ vehicle: vehicles[1]._id.toString() });
+        .query({ v: vehicles[1]._id.toString() });
       expect(response.status).toEqual(200);
     } catch (err) {
       expect(err).toEqual('POST 200 attachment unexpected error');
@@ -341,7 +340,7 @@ describe('End-To-End myGarage Test', () => {
         .authBearer(loginResult.token)
         .field('filename', 'R1200.JPG')
         .attach('attachment', testFile)
-        .query({ log: logs[1]._id.toString() });
+        .query({ l: logs[1]._id.toString() });
       expect(response.status).toEqual(200);
     } catch (err) {
       expect(err).toEqual('POST 200 attachment unexpected error');
