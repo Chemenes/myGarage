@@ -489,4 +489,4 @@ This process will successfully delete a users attachments(Any images, reciepts, 
 
 Status codes 404 will return if a attachment is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
-[Back to API TOC](#API-Routes-and-Documentation)
+
