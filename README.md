@@ -48,7 +48,7 @@ Click on a route to jump to its documentation
   - [/api/garages](#POST-/api/garages)
   - [/api/vehicles](#POST-/api/vehicles)
   - [/api/maintenance-logs](#POST-/api/maintenance-logs)
-  - [/api/attachments](#POST-/api/attachments)
+  - [/api/attachments](#POST-/api/attachments/[profile|garage|vehicle|maintenance-log]?id=modelId)
 
 - GET (Read)
   - [/api/login](#GET-/api/login)
@@ -240,11 +240,13 @@ Errors are reported for bad request and invalid token.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/attachments
+#### POST /api/attachments/[profile|garage|vehicle|maintenance-log]?id=modelId
 
 Any resource (other than the accounts) can have files attached.  These can be scans of maitenance receipts, images, PDFs, etc.
 
-You create an attachment by uploading it using the POST /api/attachments route. Use the "file" input box type in HTML or use Postman's file option.
+You create an attachment by uploading it using the POST /api/attachments route. Use the "file" input box type in HTML or use Postman's file option. Add a model identifier to the route and it's id in the query string to attache the file to that resource.
+
+For example, to attach a document to a vehicle (perhaps an image of the registration) you would to a POST request to /api/attachments/vehicle?id=vehicleId with the scan file included in the body of the message.
 
 On success you'll get back JSON in this form:
 ```
@@ -261,8 +263,6 @@ On success you'll get back JSON in this form:
     "__v": 0
 }
 ```
-The _id property can be used to attach the document to an existing resource by getting it, pushing the _id onto its attachments array and then updating the resource.
-
 The url property is the link provided by AWS that can be used to retrieve the document for display.
 
 Error codes will be returned for bad request.
