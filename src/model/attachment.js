@@ -35,20 +35,15 @@ const attachmentSchema = mongoose.Schema({
 }, { timestamps: true });
 
 attachmentSchema.methods.attach = async function attach(model, id) {
-  let result;
-  switch (model) {
-    case 'profile':
-      result = await Profile.findOne({ _id: id });
-      break;
-    case 'garage':
-      result = await Garage.findOne({ _id: id });
-      break;
-    case 'vehicle':
-      result = await Vehicle.findOne({ _id: id });
-      break;
-    default: // maintenance log
-      result = await Logs.findOne({ _id: id });
-  }
+  const models = {
+    profile: Profile,
+    garage: Garage,
+    vehicle: Vehicle,
+    maintenancelog: Logs,
+    log: Logs,
+  };
+
+  const result = await models[model].findOne({ _id: id });
   
   result.attachments.push(this._id);
 

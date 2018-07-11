@@ -108,13 +108,12 @@ describe('TESTING MAINT LOG ROUTER', () => {
       const mockMaintenanceLog = {
         description: faker.lorem.words(5),
         dateOfService: new Date(),
-        vehicleId: mockData.vehicle._id,                
-        profileId: mockData.vehicle.profileId,
       };
       let response;
       try {
         response = await superagent.post(`${apiUrl}/maintenance-logs`)
           .authBearer(mockData.token)
+          .query({ vehicle: mockData.vehicle._id.toString() })
           .send(mockMaintenanceLog);
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
@@ -122,9 +121,10 @@ describe('TESTING MAINT LOG ROUTER', () => {
       expect(response.status).toEqual(200);
       expect(response.body.description).toEqual(mockMaintenanceLog.description);
       expect(response.body.dateOfService).toBeTruthy(); // date format hard to compare
-      expect(response.body.vehicleId).toEqual(mockMaintenanceLog.vehicleId.toString());
-      expect(response.body.profileId).toEqual(mockMaintenanceLog.profileId.toString());
+      expect(response.body.vehicleId).toEqual(mockData.vehicle._id.toString());
+      expect(response.body.profileId).toBeTruthy();
     });
+
     test('POST 400 for trying to post a log with a bad token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/maintenance-logs`)

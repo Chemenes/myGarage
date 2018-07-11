@@ -36,14 +36,15 @@ describe('TESTING VEHICLE ROUTER', () => {
         make: faker.name.lastName(),
         model: faker.name.lastName(),
         type: 'car',
-        garageId: garage._id,                
-        profileId: garage.profileId._id,
+        // garageId: garage._id,                
+        // profileId: garage.profileId._id,
       };
       let response;
       
       try {
         response = await superagent.post(`${apiUrl}/vehicles`)
           .authBearer(token)
+          .query({ g: garage._id.toString() })
           .send(mockVehicle);
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
@@ -53,13 +54,14 @@ describe('TESTING VEHICLE ROUTER', () => {
       expect(response.body.make).toEqual(mockVehicle.make);
       expect(response.body.model).toEqual(mockVehicle.model);
       expect(response.body.type).toEqual('car');      
-      expect(response.body.garageId).toEqual(mockVehicle.garageId.toString());
-      expect(response.body.profileId).toEqual(mockVehicle.profileId.toString());
+      expect(response.body.garageId).toEqual(garage._id.toString());
+      expect(response.body.profileId).toEqual(garage.profileId.toString());
     });
 
     test('POST 400 for trying to post a vehicle with a bad token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/vehicles`)
+          .query({ garage: garage._id })
           .set('Authorization', 'Bearer THISABADTOKEN');
         expect(response).toEqual('POST 400 in try block. Shouldn\'t be executed.');
       } catch (err) {
@@ -73,8 +75,8 @@ describe('TESTING VEHICLE ROUTER', () => {
         make: faker.name.lastName(),
         model: faker.name.lastName(),
         type: 'car',
-        garageId: garage._id,                
-        profileId: garage.profileId._id,
+        // garageId: garage._id,                
+        // profileId: garage.profileId._id,
       };
       try {
         const response = await superagent.post(`${apiUrl}/vehicles`)
