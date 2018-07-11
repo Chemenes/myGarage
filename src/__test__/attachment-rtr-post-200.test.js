@@ -11,22 +11,8 @@ const testFile = `${__dirname}/asset/r1200.jpg`;
 const apiUrl = `http://localhost:${process.env.PORT}/api/attachments`;
 
 describe('TESTING ROUTES AT /api/attachments', () => {
-  // let token;
-  // let profile;
   beforeAll(startServer);
   afterAll(stopServer);
-  // beforeEach(async () => {
-  //   try {
-  //     const mockData = await createAttachmentMockPromise();
-  //     console.log('????? after mocking, data:', JSON.stringify(mockData, null, 2));
-  //     token = mockData.token; /*eslint-disable-line*/
-  //     attachment = mockData.attachment; /*eslint-disable-line*/
-  //     profile = mockData.profile; /*eslint-disable-line*/
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  //   return undefined;
-  // });
   afterEach(async () => {
     await removeAttProfAccntMock();
   });
@@ -34,18 +20,14 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   describe('POST ROUTES TO /api/attachments', () => {
     test('POST 200', async () => {
       let token;
-      // let attachment;
       let profile;
       try {
         const mockData = await createAttachmentMockPromise();
-        // console.log('????? after mocking, data:', JSON.stringify(mockData, null, 2));
         token = mockData.token; /*eslint-disable-line*/
-        // attachment = mockData.attachment; /*eslint-disable-line*/
         profile = mockData.profile; /*eslint-disable-line*/
       } catch (err) {
         throw err;
       }
-      // console.log('>>>> profile:', profile);
       try {
         const response = await superagent.post(apiUrl)
           .authBearer(token)

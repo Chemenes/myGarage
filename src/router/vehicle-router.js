@@ -28,7 +28,6 @@ vehicleRouter.post('/api/vehicles', bearerAuthMiddleware, (request, response, ne
         profileId: request.profile._id,
         garageId: request.query[qTag],
       };
-      console.log('%%%%%% post vehicle newV', newV);
       return new Vehicle(newV).save();
     })
     .then((vehicle) => {

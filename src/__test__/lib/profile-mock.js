@@ -19,7 +19,6 @@ const createProfileMockPromise = async () => {
 
   const profile = await new Profile(mockProfile).save();
   mockData.profile = profile;
-  // console.log('%%%%% profileMOCK returning', JSON.stringify(mockData, null, 2));
   return mockData;
 };
 

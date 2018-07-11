@@ -25,7 +25,6 @@ The API is implemented using a collection of MondoDB document models:
   - Vehicles
   - Maintenance Logs
   - Attachments
-  - Clubs
 
 Relationships between models include:
 

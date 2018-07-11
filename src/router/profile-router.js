@@ -31,7 +31,6 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
 });
 
 profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  console.log('$$$$$$ request.profile', request.profile);
   if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request. Not logged in.', { expose: false }));
 
   if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));

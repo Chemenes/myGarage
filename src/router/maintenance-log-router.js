@@ -26,7 +26,6 @@ maintenanceLogRouter.post('/api/maintenance-logs', bearerAuthMiddleware, (reques
         profileId: request.profile._id,
         vehicleId: request.query[qTag],
       };
-      console.log('^^^^^^^ log router newLog:', newLog);
       return new MaintenanceLog(newLog).save();
     })
     .then((maintenanceLog) => {
