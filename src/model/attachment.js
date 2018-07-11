@@ -49,9 +49,9 @@ attachmentSchema.methods.attach = async function attach(model, id) {
     default: // maintenance log
       result = await Logs.findOne({ _id: id });
   }
-  if (!result.attachments.map(v => v.toString().includes(this._id.toString()))) {
-    result.attachments.push(this._id);
-  }
+  
+  result.attachments.push(this._id);
+
   return result.save();
 };
 

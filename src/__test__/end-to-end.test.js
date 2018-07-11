@@ -253,5 +253,80 @@ describe('End-To-End myGarage Test', () => {
     }
     console.log('>>> profile after attachment added', JSON.stringify(profileResult, null, 2));
     expect(profileResult.attachments).toHaveLength(1);
+
+    // add one to the garage
+    try {
+      response = await superagent.post(`${apiUrl}/attachments/garage`)
+        .authBearer(loginResult.token)
+        .field('filename', 'R1200.JPG')
+        .attach('attachment', testFile)
+        .query({ id: garageResult._id.toString() });
+      expect(response.status).toEqual(200);
+    } catch (err) {
+      expect(err).toEqual('POST 200 attachment unexpected error');
+    }
+    // get garage again to see if it took
+    try {
+      response = await superagent.get(`${apiUrl}/garages`)
+        .query({ id: garageResult._id.toString() })
+        .authBearer(loginResult.token);
+      expect(response.status).toEqual(200);
+      garageResult = response.body;
+    } catch (err) {
+      expect(err.status).toEqual('GET that should work.');
+    }
+    console.log('>>> garage after attachment added', JSON.stringify(garageResult, null, 2));
+    expect(garageResult.attachments).toHaveLength(1);
+
+    // add one to vehicle[1]
+    try {
+      response = await superagent.post(`${apiUrl}/attachments/vehicle`)
+        .authBearer(loginResult.token)
+        .field('filename', 'R1200.JPG')
+        .attach('attachment', testFile)
+        .query({ id: vehicles[1]._id.toString() });
+      expect(response.status).toEqual(200);
+    } catch (err) {
+      expect(err).toEqual('POST 200 attachment unexpected error');
+    }
+    // get vehicle again to see if it took
+    try {
+      response = await superagent.get(`${apiUrl}/vehicles`)
+        .query({ id: vehicles[1]._id.toString() })
+        .authBearer(loginResult.token);
+      expect(response.status).toEqual(200);
+      vehicles[1] = response.body;
+    } catch (err) {
+      expect(err.status).toEqual('GET that should work.');
+    }
+    console.log('>>> vehicles[1] after attachment added', JSON.stringify(vehicles[1], null, 2));
+    expect(vehicles[1].attachments).toHaveLength(1);
+
+    // add one to maintenance log 1 (vehicle 1)
+    try {
+      response = await superagent.post(`${apiUrl}/attachments/maintenance-log`)
+        .authBearer(loginResult.token)
+        .field('filename', 'R1200.JPG')
+        .attach('attachment', testFile)
+        .query({ id: logs[1]._id.toString() });
+      expect(response.status).toEqual(200);
+    } catch (err) {
+      expect(err).toEqual('POST 200 attachment unexpected error');
+    }
+    // get vehicle again to see if it took
+    try {
+      response = await superagent.get(`${apiUrl}/maintenance-logs`)
+        .query({ id: logs[1]._id.toString() })
+        .authBearer(loginResult.token);
+      expect(response.status).toEqual(200);
+      logs[1] = response.body;
+    } catch (err) {
+      expect(err.status).toEqual('GET that should work.');
+    }
+    console.log('>>> logs[1] after attachment added', JSON.stringify(logs[1], null, 2));
+    expect(logs[1].attachments).toHaveLength(1);
+
+    const prof = await Profile.findOne({ _id: profileResult._id }).populate();
+    console.log('@@@@@@@@ profile poulated?', JSON.stringify(prof, null, 2));
   });
 });
