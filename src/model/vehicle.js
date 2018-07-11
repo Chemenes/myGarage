@@ -1,6 +1,7 @@
 'use strict';
 
 import mongoose from 'mongoose';
+import Garage from './garage';
 
 const vehicleSchema = mongoose.Schema({
   name: {
@@ -35,6 +36,16 @@ const vehicleSchema = mongoose.Schema({
   },
 }, { timestamps: true });
 
+vehicleSchema.post('save', (vehicle) => {
+  Garage.findById(vehicle.garageId)
+    .then((garage) => {
+      garage.vehicles.push(vehicle._id);
+      return garage.save();
+    })
+    .catch((err) => {
+      throw err;
+    });
+});
 
 const skipInit = process.env.NODE_ENV === 'development';
 export default mongoose.model('Vehicle', vehicleSchema, 'vehicles', skipInit);
