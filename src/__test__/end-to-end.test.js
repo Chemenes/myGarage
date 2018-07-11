@@ -88,7 +88,7 @@ describe('End-To-End myGarage Test', () => {
       expect(err).toEqual('POST 200 test that should pass');
     }
     expect(response.status).toEqual(200);
-    const profileResult = response.body;
+    let profileResult = response.body;
     console.log('>>> profileResult', JSON.stringify(profileResult, null, 2));
 
     //
@@ -99,8 +99,6 @@ describe('End-To-End myGarage Test', () => {
       description: faker.lorem.words(8),
       location: `${faker.address.city()}, ${faker.address.state()}`,
       profileId: profileResult._id,
-      // vehicles?  Need to mock vehicles first.  
-      // attachments: [mockData.attachment._id],  
     };
 
     let garageResult;
@@ -114,6 +112,20 @@ describe('End-To-End myGarage Test', () => {
     }
     expect(response.status).toEqual(200);
     console.log('>>> garageResult', JSON.stringify(garageResult, null, 2));
+
+    // get the profile now and make sure garage was 
+    // added
+    try {
+      response = await superagent.get(`${apiUrl}/profiles`)
+        .query({ id: profileResult._id.toString() })
+        .authBearer(loginResult.token);
+      expect(response.status).toEqual(200);
+      profileResult = response.body;
+    } catch (err) {
+      expect(err.status).toEqual('GET that should work.');
+    }
+    console.log('>>> profile after garage added', JSON.stringify(profileResult, null, 2));
+    expect(profileResult.garages).toHaveLength(1);
 
     //
     // now create 3 vehicles
@@ -136,12 +148,15 @@ describe('End-To-End myGarage Test', () => {
       response = await superagent.post(`${apiUrl}/vehicles`)
         .authBearer(loginResult.token)
         .send(vehicles[0]);
+      vehicles[0] = response.body;
       response = await superagent.post(`${apiUrl}/vehicles`)
         .authBearer(loginResult.token)
         .send(vehicles[1]);
+      vehicles[1] = response.body;
       response = await superagent.post(`${apiUrl}/vehicles`)
         .authBearer(loginResult.token)
         .send(vehicles[2]);
+      vehicles[2] = response.body;
     } catch (err) {
       expect(err).toEqual('POST 200 test that should pass');
     }
@@ -159,5 +174,84 @@ describe('End-To-End myGarage Test', () => {
     }
     console.log('>>> post vehicle add garageResult', JSON.stringify(garageResult, null, 2));
     expect(garageResult.vehicles).toHaveLength(3);
+
+    //
+    // Now add maintenance records to vehicles
+    //
+    const maintenanceLog = {
+      description: faker.lorem.words(3),
+      dateOfService: new Date().toISOString(),
+      // profileId: profileResult._id,
+    };
+
+    const logs = [];
+    try {
+      maintenanceLog.vehicleId = vehicles[0]._id;
+      response = await superagent.post(`${apiUrl}/maintenance-logs`)
+        .authBearer(loginResult.token)
+        .send(maintenanceLog);
+      logs[0] = response.body;
+      maintenanceLog.vehicleId = vehicles[1]._id;
+      response = await superagent.post(`${apiUrl}/maintenance-logs`)
+        .authBearer(loginResult.token)
+        .send(maintenanceLog);
+      logs[1] = response.body;
+      maintenanceLog.vehicleId = vehicles[2]._id;
+      response = await superagent.post(`${apiUrl}/maintenance-logs`)
+        .authBearer(loginResult.token)
+        .send(maintenanceLog);
+      logs[2] = response.body;
+    } catch (err) {
+      expect(err).toEqual('maintence log POST that should pass');
+    }
+    expect(response.status).toEqual(200);
+    
+    // retrieve vehicles to verify maintenance records
+    // were added
+    response = await superagent.get(`${apiUrl}/vehicles`)
+      .authBearer(loginResult.token)
+      .query({ id: vehicles[0]._id });
+    vehicles[0] = response.body;
+    console.log('>>> post logs Add Vehicle 0', vehicles[0]);
+    expect(response.status).toEqual(200);
+    vehicles[1] = await superagent.get(`${apiUrl}/vehicles`)
+      .authBearer(loginResult.token)
+      .query({ id: vehicles[1]._id });
+    vehicles[1] = vehicles[1].body;
+    console.log('>>> post logs Add Vehicle 1', vehicles[1]);
+    vehicles[2] = await superagent.get(`${apiUrl}/vehicles`)
+      .authBearer(loginResult.token)
+      .query({ id: vehicles[2]._id });
+    vehicles[2] = vehicles[2].body;
+    console.log('>>> post logs Add Vehicle 2', vehicles[2]);
+
+    //
+    // now sprinkle some attachments around
+    //
+    const testFile = `${__dirname}/asset/r1200.jpg`;
+
+    // add one to the profile
+    try {
+      response = await superagent.post(`${apiUrl}/attachments/profile`)
+        .authBearer(loginResult.token)
+        .field('filename', 'R1200.JPG')
+        .attach('attachment', testFile)
+        .query({ id: profileResult._id.toString() });
+      expect(response.status).toEqual(200);
+    } catch (err) {
+      expect(err).toEqual('POST 200 attachment unexpected error');
+    }
+    // get profile again to see if it took
+    try {
+      response = await superagent.get(`${apiUrl}/profiles`)
+        .query({ id: profileResult._id.toString() })
+        .authBearer(loginResult.token);
+      expect(response.status).toEqual(200);
+      profileResult = response.body;
+    } catch (err) {
+      expect(err.status).toEqual('GET that should work.');
+    }
+    console.log('>>> profile after attachment added', JSON.stringify(profileResult, null, 2));
+    expect(profileResult.attachments).toHaveLength(1);
   });
 });

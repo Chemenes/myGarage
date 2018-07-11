@@ -28,7 +28,9 @@ const garageSchema = mongoose.Schema({
 garageSchema.post('save', (garage) => {
   Profile.findById(garage.profileId)
     .then((profile) => {
-      profile.garages.push(garage._id);
+      if (!profile.garages.map(v => v.toString()).includes(garage._id.toString())) {
+        profile.garages.push(garage._id);
+      }
       return profile.save();
     })
     .catch((err) => {

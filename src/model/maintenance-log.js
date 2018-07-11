@@ -28,7 +28,9 @@ const maintenanceLogSchema = mongoose.Schema({
 maintenanceLogSchema.post('save', (log) => {
   Vehicle.findById(log.vehicleId)
     .then((vehicle) => {
-      vehicle.maintenanceLogs.push(log._id);
+      if (!vehicle.maintenanceLogs.map(v => v.toString()).includes(log._id.toString())) {
+        vehicle.maintenanceLogs.push(log._id);
+      }
       return vehicle.save();
     })
     .catch((err) => {

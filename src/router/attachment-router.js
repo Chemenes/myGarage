@@ -10,8 +10,16 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 
 const attachmentRouter = new Router();
 
-attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
+attachmentRouter.post('/api/attachments/:model', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
   if (!request.account) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: not authorized', { expose: false }));
+
+  if (!['profile', 'garage', 'vehicle', 'maintenance-log'].includes(request.params.model)) {
+    return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid model: ${request.params.model}`, { expose: false }));
+  }
+
+  if (!request.query.id) {
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model ID query', { expose: false }));
+  }
 
   if (request.files.length !== 1) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request', { expose: false }));
@@ -23,6 +31,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
 
   const key = `${file.filename}.${file.originalname}`;
 
+  let savedAttachment;
   return s3Upload(file.path, key)
     .then((url) => {
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: received a valid URL from Amazon S3: ${url}`);
@@ -37,27 +46,41 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
     })
     .then((newAttachment) => {
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: new attachment created: ${JSON.stringify(newAttachment, null, 2)}`);
-      return response.json(newAttachment);
+      savedAttachment = newAttachment;
+      return newAttachment.attach(request.params.model, request.query.id);
+    })
+    .then(() => {
+      return response.json(savedAttachment);
     })
     .catch(next); 
 });
 
-attachmentRouter.get('/api/attachments/:id?', bearerAuthMiddleware, (request, response, next) => {
+attachmentRouter.get('/api/attachments', bearerAuthMiddleware, (request, response, next) => {
   if (!request.account) return next(new HttpErrors(401), 'ATTACHMENT ROUTER GET: invalid request', { expose: false });
-  if (!request.params.id) return next(new HttpErrors(400, 'ATTACHMENT ROUTER GET: no id provided', { expose: false }));
-  return Attachment.findById(request.params.id)
+
+  if (!request.query.id) {
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER GET ERROR: missing ID query', { expose: false }));
+  }
+  
+  return Attachment.findById(request.query.id)
     .then((attachment) => {
       if (!attachment) return next(new HttpErrors(404, 'ATTACHMENT ROUTER GET: no attachment found in database', { expose: false }));
+
       logger.log(logger.INFO, `ATTACHMENT ROUTER GET: successfully found attachment ${JSON.stringify(attachment, null, 2)}`);
+
       return response.json(attachment);
     })
     .catch(next);
 });
 
-attachmentRouter.delete('/api/attachments/:id?', bearerAuthMiddleware, (request, response, next) => {
+attachmentRouter.delete('/api/attachments', bearerAuthMiddleware, (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(401), 'ATTACHMENT ROUTER DELETE: invalid request', { expose: false });
-  if (!request.params.id) return next(new HttpErrors(400, 'ATTACHMENT ROUTER DELETE: no id provided', { expose: false }));
-  return Attachment.findById(request.params.id)
+
+  if (!request.query.id) {
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model ID query', { expose: false }));
+  }
+  
+  return Attachment.findById(request.query.id)
     .then((attachment) => {
       if (!attachment) return next(new HttpErrors(404, 'ATTACHMENT ROUTER DELETE: attachment not found in database', { expose: false }));
       const key = attachment.awsKey;

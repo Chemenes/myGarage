@@ -39,7 +39,9 @@ const vehicleSchema = mongoose.Schema({
 vehicleSchema.post('save', (vehicle) => {
   Garage.findById(vehicle.garageId)
     .then((garage) => {
-      garage.vehicles.push(vehicle._id);
+      if (!garage.vehicles.map(v => v.toString()).includes(vehicle._id.toString())) {
+        garage.vehicles.push(vehicle._id);
+      }
       return garage.save();
     })
     .catch((err) => {
