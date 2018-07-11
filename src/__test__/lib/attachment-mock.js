@@ -24,7 +24,6 @@ const createAttachmentMockPromise = async () => {
   
   mockData.attachment = attachment;
   
-  // console.log('$$$$$$ attachMOCK returning', JSON.stringify(mockData, null, 2));
   return mockData;
 };
 

@@ -1,0 +1,126 @@
+{
+  "config": {
+    "environments": {
+      "production": {
+        "target": "https://mygarage1.herokuapp.com"
+      },
+      "development": {
+        "target": "http://localhost:3000"
+      }
+    },
+    "http": {
+      "tls": {
+        "rejectUnauthorized": false
+      }
+    },
+    "phases": [
+      {
+       "duration": 1,
+       "arrivalRate": 5,
+       "name": "Warming up..."
+      },
+      {
+        "duration": 10,
+        "arrivalRate": 5,
+        "rampTo": 30,
+        "name": "Ramping up to max load"
+      },
+      {
+        "duration": 10,
+        "arrivalRate": 30,
+        "name": "Sustained max rate"
+      }
+    ],
+    "processor" : "./load-test-create-user.js"
+  },
+  "scenarios": [
+    {
+      "name": "Signup, login, create profile, garage, vehicle",
+      "flow": [
+        {
+          "post": {
+            "url": "/api/signup",
+            "beforeRequest": "create",
+            "json": {
+              "username": "{{ username }}",
+              "email": "{{ email }}",
+              "password": "{{ password }}"
+            },
+            "capture": {
+              "json": "$.token",
+              "as": "token"
+            }
+          }
+        },
+        {
+          "get": {
+            "url": "/api/login",
+            "beforeRequest": "retrieveData",
+            "headers": {
+              "Authorization": "Basic {{ b64 }}"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/api/profiles",
+            "headers": {
+              "Authorization": "Bearer {{ token }}"
+            },
+            "json": {
+              "bio": "{{ bio }}",
+              "firstName": "{{ firstName }}",
+              "lastName": "{{ lastName }}"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/api/garages",
+            "headers": {
+              "Authorization": "Bearer {{ token }}"
+            },
+            "json": {
+              "name": "{{ name }}",
+              "location": "{{ location }}",
+              "description": "{{ description }}"
+            },
+            "capture": {
+              "json": "$._id",
+              "as": "garageId"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/api/vehicles?g={{ garageId }}",
+            "headers": {
+              "Authorization": "Bearer {{ token }}"
+            },
+            "json": {
+              "name": "{{ carName }}",
+              "make": "{{ carMake }}",
+              "model": "{{ carModel }}",
+              "type": "car"
+            },
+            "capture": {
+              "json": "$._id",
+              "as": "vehicleId"
+            }
+          }
+        },
+        {
+          "post": {
+            "url": "/api/maintenance-logs?v={{ vehicleId }}",
+            "headers": {
+              "Authorization": "Bearer {{ token }}"
+            },
+            "json": {
+              "description": "{{ logDesc }}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
