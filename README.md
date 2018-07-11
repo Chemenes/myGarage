@@ -422,9 +422,15 @@ The route responds with 200 on success, 400 on bad request, 401 on bad authoriza
 
 #### PUT /api/profiles
 
-To update an existing profile, first GET the profile, then change whichever values need updating. Then use this route to send the updated profile back to the database. The route takes a query string of the form ?id=profileId. The body of the request should be the JSON stringified profile object.  On success you will get back the updated profile object as a JSON string.
+To update an existing profile, simply pass the API a request body with the properties you wish to change and their new values.  For example, to just change the bio field you'd send:
+```
+{
+    "bio": "This is my new bio! I just gained another grandchild!"
+}
+```
+The API retrieves your profile using the login information stored in the bearer authorization token.
 
-Status 200 is returned on success, 400 for bad request, 401 for bad authentication.
+Status 200 is returned on success, 400 for bad request, 401 for bad authentication, 404 if you try this before you're logged in.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
