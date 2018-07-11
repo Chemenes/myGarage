@@ -37,17 +37,31 @@ const attachmentSchema = mongoose.Schema({
 attachmentSchema.methods.attach = async function attach(model, id) {
   const models = {
     profile: Profile,
+    p: Profile,
     garage: Garage,
+    g: Garage,
     vehicle: Vehicle,
+    v: Vehicle,
     maintenancelog: Logs,
-    log: Logs,
+    l: Logs,
   };
 
-  const result = await models[model].findOne({ _id: id });
-  
-  result.attachments.push(this._id);
+  // const result = await models[model].findOne({ _id: id });
+  // result.attachments.push(this._id)
+  // return result.save();
 
-  return result.save();
+  let result;
+  models[model].findOne({ _id: id })
+    .then((found) => { // result should be a mongoose object
+      result = found;
+      return result.attachments.push(this._id);
+    })
+    .then(() => {
+      return result.save();
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
 
 const skipInit = process.env.NODE_ENV === 'development';

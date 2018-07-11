@@ -46,9 +46,9 @@ Click on a route to jump to its documentation
   - [/api/signup](#POST-/api/signup)
   - [/api/profiles](#POST-/api/profiles)
   - [/api/garages](#POST-/api/garages)
-  - [/api/vehicles](#POST-/api/vehicles)
+  - [/api/vehicles](#POST-/api/vehicles?[garage|g]=garageId)
   - [/api/maintenance-logs](#POST-/api/maintenance-logs?[vehicle|v]=vehicleId)
-  - [/api/attachments](#POST-/api/attachments?[profile|garage|vehicle|maintenance-log|log]=modelId)
+  - [/api/attachments](#POST-/api/attachments?[profile|p|garage|g|vehicle|v|maintenance-log|l]=modelId)
 
 - GET (Read)
   - [/api/login](#GET-/api/login)
@@ -121,14 +121,15 @@ Error codes will be returned for duplicate username or password (409), or missin
 
 #### POST /api/profiles
 
-POST to /api/profiles creates a new MyGarage profile.  The body of the request must include the following properties:
+POST to /api/profiles creates a new MyGarage profile.  The profile is automatically associated with the current session.
+
+The body of the request must include the following properties:
 ```
 firstName (required)
 lastName
 bio
 location
 profileImageUrl
-accountId (required, provided by GET /api/login)
 ```
 On success the API will return an object such as this:
 ```
@@ -153,12 +154,13 @@ Errors are returned for a badly formated request (400), invalid authorization to
 
 #### POST /api/garages
 
-Garages hold Vehicles. A user may have any number of garages containing any number of vehicles. The body of the GET request to /api/garages includes these fields:
+Garages hold Vehicles. A user may have any number of garages containing any number of vehicles.  This POST route automatically associates the garage with the current profile. 
+
+The body of the GET request to /api/garages includes these fields:
 ```
 name (required)
 description
 location
-profileId (required, provided at login)
 attachments (array of attachment IDs)
 ```
 On success the API responds in this form:
@@ -180,7 +182,7 @@ Error responses are returned for bad request (400) or bad authorization token (4
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/vehicles
+#### POST /api/vehicles?[garage|g]=garageId
 
 POSTs to /api/vehicles create vehicle resources. The request body includes these fields:
 ```
@@ -188,10 +190,10 @@ name (required)
 make
 model
 type (required. Must be one of car, truck, boat, rv, plane, atv, suv or motorcycle. Defaults to car.)
-garageId (required)
-profileId (required)
-attachments (array of attachment IDs)
+attachments (optional array of attachment IDs)
 ```
+The query string associates the vehicle with an existing garage.
+
 On success, the API responds in this form:
 ```
 {
@@ -240,7 +242,7 @@ Errors are reported for bad request and invalid token.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/attachments?[profile|garage|vehicle|maintenance-log|log]=modelId
+#### POST /api/attachments?[profile|p|garage|g|vehicle|v|maintenance-log|l]=modelId
 
 Any resource (other than the accounts) can have files attached.  These can be scans of maitenance receipts, images, PDFs, etc.
 
@@ -290,7 +292,7 @@ Error codes are returned for invalid username or password (401) and bad request 
 
 #### GET /api/profiles
 
-The profiles GET route takes a query string of id=profileId. So the full URI would be /api/profiles?id=profileId where profileID is the id string returned upon successful login.  
+The profiles GET route returns the profile associated with the current session. You must have done a previous GET /api/login. The profile is found from data stored with the authentication token provided on login which is passed to the server as a bearer auth token.  
 
 On success, the API return JSON of the form:
 ```

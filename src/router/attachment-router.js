@@ -18,7 +18,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model query', { expose: false }));
   }
 
-  if (!['profile', 'garage', 'vehicle', 'maintenancelog', 'log'].includes(modelName)) {
+  if (!['profile', 'p', 'garage', 'g', 'vehicle', 'v', 'maintenancelog', 'l'].includes(modelName)) {
     return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid model in query: ${modelName}`, { expose: false }));
   }
 

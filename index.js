@@ -1,5 +1,6 @@
 'use strict';
 
+require('babel-polyfill');
 require('dotenv').config();
 
 const logger = require('./src/lib/logger');
