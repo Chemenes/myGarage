@@ -226,7 +226,6 @@ describe('TESTING VEHICLE ROUTER', () => {
     test('DELETE 200 success', async () => {
       const mock = await createVehicleMockPromise();
       const vehicle = mock.vehicle;/*eslint-disable-line*/
-      console.log('$$$$$$$ Delete', vehicle._id);
       let response;
       try {
         response = await superagent.delete(`${apiUrl}/vehicles`)
@@ -236,7 +235,6 @@ describe('TESTING VEHICLE ROUTER', () => {
       } catch (err) {
         expect(err).toEqual('Unexpected error on delete test');
       }
-      console.log('$$$$$ response status:', response.status);
     });
 
 

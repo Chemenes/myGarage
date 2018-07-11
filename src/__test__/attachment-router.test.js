@@ -12,6 +12,7 @@ const apiUrl = `http://localhost:${process.env.PORT}/api/attachments`;
 
 describe('TESTING ROUTES AT /api/attachments', () => {
   let token;
+  let profile;
   let attachment;
   beforeAll(startServer);
   afterAll(stopServer);
@@ -20,6 +21,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       const mockData = await createAttachmentMockPromise();
       token = mockData.token; /*eslint-disable-line*/
       attachment = mockData.attachment; /*eslint-disable-line*/
+      profile = mockData.profile; /*eslint-disable-line*/
     } catch (err) {
       throw err;
     }
@@ -29,18 +31,19 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     await removeAttProfAccntMock();
   });
 
-  describe('POST ROUTES TO /api/attachments', () => {
+  describe('POST ROUTES TO /api/attachments/profile', () => {
     test('POST 200', async () => {
       try {
-        const response = await superagent.post(apiUrl)
+        const response = await superagent.post(`${apiUrl}/profile`)
           .authBearer(token)
           .field('filename', 'R1200.JPG')
-          .attach('attachment', testFile);
+          .attach('attachment', testFile)
+          .query({ id: profile._id.toString() });
         expect(response.status).toEqual(200);
         expect(response.body.originalName).toEqual('r1200.jpg');
         expect(response.body._id).toBeTruthy();
         expect(response.body.url).toBeTruthy();
-        Object.assign(attachment, response.body);
+        // Object.assign(attachment, response.body);
       } catch (err) {
         expect(err).toEqual('POST 200 attachment unexpected error');
       }
@@ -49,7 +52,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('POST 400 to /api/attachments with bad request', async () => {
       try {
-        const response = await superagent.post(apiUrl)
+        const response = await superagent.post(`${apiUrl}/garage`)
           .authBearer(token)
           .field('weDontCareAboutThisField', 'R1200.JPG');
           // .attach('attachment', testFile);
@@ -61,10 +64,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('POST 401 to /api/attachments with bad token', async () => {
       try {
-        const response = await superagent.post(apiUrl)
+        const response = await superagent.post(`${apiUrl}/vehicle`)
           .authBearer('bad-token')
           .field('filename', 'R1200.JPG')
-          .attach('attachment', testFile);
+          .attach('attachment', testFile)
+          .query({ id: attachment._id.toString() });
         expect(response).toEqual('POST 401 unexpected response');
       } catch (err) {
         expect(err.status).toEqual(401);
@@ -75,8 +79,9 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   describe('GET ROUTES to /api/attachments', () => {
     test('200 GET /api/attachments for successful fetching', async () => {
       try {
-        const response = await superagent.get(`${apiUrl}/${attachment._id}`)
-          .authBearer(token);
+        const response = await superagent.get(apiUrl)
+          .authBearer(token)
+          .query({ id: attachment._id.toString() });
         expect(response.status).toEqual(200);
         expect(response.body.originalName).toEqual(attachment.originalName);
         expect(response.body.profileId).toEqual(attachment.profileId.toString());
@@ -89,8 +94,9 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('404 GET /api/attachments with bad id', async () => {
       try {
-        const response = await superagent.get(`${apiUrl}/1234567890`)
-          .authBearer(token);
+        const response = await superagent.get(apiUrl)
+          .authBearer(token)
+          .query({ id: '123456890' });
         expect(response).toEqual('404 GET returned unexpected response');
       } catch (err) {
         expect(err.status).toEqual(404);
@@ -101,8 +107,9 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   describe('DELETE ROUTES to /api/attachments', () => {
     test('200 DELETE /api/attachments for successful deletion of a attachment', async () => {
       try {
-        const response = await superagent.delete(`${apiUrl}/${attachment._id}`)
-          .authBearer(token);
+        const response = await superagent.delete(apiUrl)
+          .authBearer(token)
+          .query({ id: attachment._id.toString() });
         expect(response.status).toEqual(200);
       } catch (err) {
         expect(err.message).toEqual('FAILING TO GET GOOD STATUS FROM DELETE');
@@ -111,8 +118,9 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('404 DELETE /api/attachments with bad cover id', async () => {
       try {
-        const response = await superagent.get(`${apiUrl}/1234567890`)
-          .authBearer(token);
+        const response = await superagent.get(apiUrl)
+          .authBearer(token)
+          .query({ id: '1234567890' });
         expect(response).toEqual('404 DELETE returned unexpected response');
       } catch (err) {
         expect(err.status).toEqual(404);

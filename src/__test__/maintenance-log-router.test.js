@@ -241,7 +241,6 @@ describe('TESTING MAINT LOG ROUTER', () => {
         const mock = await
         createMaintenanceLogMockPromise();
         const maintenanceLog = mock.maintenanceLog; /*eslint-disable-line*/
-        console.log('^^^^^^ Delete', maintenanceLog._id);
         let response;
         try {
           response = await superagent.put(`${apiUrl}/maintenance-Logs`)

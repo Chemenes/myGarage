@@ -1,6 +1,7 @@
 'use strict';
 
 import mongoose from 'mongoose';
+import Profile from './profile';
 
 const garageSchema = mongoose.Schema({
   name: {
@@ -24,6 +25,18 @@ const garageSchema = mongoose.Schema({
   }],
 }, { timestamps: true });
 
+garageSchema.post('save', (garage) => {
+  Profile.findById(garage.profileId)
+    .then((profile) => {
+      if (!profile.garages.map(v => v.toString()).includes(garage._id.toString())) {
+        profile.garages.push(garage._id);
+      }
+      return profile.save();
+    })
+    .catch((err) => {
+      throw err;
+    });
+});
 
 const skipInit = process.env.NODE_ENV === 'development';
 export default mongoose.model('Garage', garageSchema, 'garages', skipInit);
