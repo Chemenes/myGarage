@@ -23,7 +23,7 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
       }).save();
     })
     .then((profile) => {
-      logger.log(logger.INFO, `POST PROFILE ROUTER: new profile created with 200 code, ${JSON.stringify(profile)}`);
+      logger.log(logger.INFO, `POST PROFILE ROUTER: new account created with 200 code, ${JSON.stringify(profile)}`);
       return response.json(profile);
     })
     .catch(next);

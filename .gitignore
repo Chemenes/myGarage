@@ -8,8 +8,6 @@ build/
 
 coverage
 
-load-testing
-
 # Created by https://www.gitignore.io/api/node,macos,visualstudiocode
 
 ### macOS ###
