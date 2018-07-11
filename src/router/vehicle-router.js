@@ -12,12 +12,24 @@ vehicleRouter.post('/api/vehicles', bearerAuthMiddleware, (request, response, ne
   logger.log(logger.INFO, `.post /api/vehicles req.body: ${request.body}`);
   if (!request.profile) return next(new HttpErrors(400, 'POST VEHICLE_ROUTER: invalid request', { expose: false }));
 
+  const qTag = Object.keys(request.query)[0]; /*eslint-disable-line*/
+  if (!qTag) {
+    return next(new HttpErrors(400, 'VEHICLE ROUTER POST ERROR: missing garage ID query string', { expose: false }));
+  }
+
+  if (!['garage', 'g'].includes(qTag)) {
+    return next(new HttpErrors(400, `VEHICLE ROUTER POST ERROR: invalid tag in query: ${qTag}. Must be "garage" or "g".`, { expose: false }));
+  }
+
   Vehicle.init()
     .then(() => {
-      return new Vehicle({
+      const newV = {
         ...request.body,
         profileId: request.profile._id,
-      }).save();
+        garageId: request.query[qTag],
+      };
+      console.log('%%%%%% post vehicle newV', newV);
+      return new Vehicle(newV).save();
     })
     .then((vehicle) => {
       logger.log(logger.INFO, `POST VEHICLE ROUTER: new vehicle created with 200 code, ${JSON.stringify(vehicle)}`);

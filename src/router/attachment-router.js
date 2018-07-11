@@ -10,15 +10,16 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 
 const attachmentRouter = new Router();
 
-attachmentRouter.post('/api/attachments/:model', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
+attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
   if (!request.account) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: not authorized', { expose: false }));
 
-  if (!['profile', 'garage', 'vehicle', 'maintenance-log'].includes(request.params.model)) {
-    return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid model: ${request.params.model}`, { expose: false }));
+  const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
+  if (!modelName) {
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model query', { expose: false }));
   }
 
-  if (!request.query.id) {
-    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model ID query', { expose: false }));
+  if (!['profile', 'garage', 'vehicle', 'maintenancelog', 'log'].includes(modelName)) {
+    return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid model in query: ${modelName}`, { expose: false }));
   }
 
   if (request.files.length !== 1) {
@@ -47,7 +48,7 @@ attachmentRouter.post('/api/attachments/:model', bearerAuthMiddleware, multerUpl
     .then((newAttachment) => {
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: new attachment created: ${JSON.stringify(newAttachment, null, 2)}`);
       savedAttachment = newAttachment;
-      return newAttachment.attach(request.params.model, request.query.id);
+      return newAttachment.attach(modelName, request.query[modelName]);
     })
     .then(() => {
       return response.json(savedAttachment);

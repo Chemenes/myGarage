@@ -47,8 +47,8 @@ Click on a route to jump to its documentation
   - [/api/profiles](#POST-/api/profiles)
   - [/api/garages](#POST-/api/garages)
   - [/api/vehicles](#POST-/api/vehicles)
-  - [/api/maintenance-logs](#POST-/api/maintenance-logs)
-  - [/api/attachments](#POST-/api/attachments/[profile|garage|vehicle|maintenance-log]?id=modelId)
+  - [/api/maintenance-logs](#POST-/api/maintenance-logs?[vehicle|v]=vehicleId)
+  - [/api/attachments](#POST-/api/attachments?[profile|garage|vehicle|maintenance-log|log]=modelId)
 
 - GET (Read)
   - [/api/login](#GET-/api/login)
@@ -211,17 +211,17 @@ Errors are returned for bad requests and invalid authorization token.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/maintenance-logs
+#### POST /api/maintenance-logs?[vehicle|v]=vehicleId
 
 Vehicles can have maintenance log records associated with them. These logs, in turn, can have attachments added to them. (See /api/attachments below.)
+
+The required query string provides the ID of the vehicle to which the maintenance log record is to be attached.
 
 The maintenance-logs route requires a body with these properties:
 ```
 description (required)
 dateOfService
-profileId (required)
-vehicleId (required)
-attachments (array of attachment IDs)
+attachments (optional. array of attachment IDs)
 ```
 On success, the route response with:
 ```
@@ -240,13 +240,15 @@ Errors are reported for bad request and invalid token.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/attachments/[profile|garage|vehicle|maintenance-log]?id=modelId
+#### POST /api/attachments?[profile|garage|vehicle|maintenance-log|log]=modelId
 
 Any resource (other than the accounts) can have files attached.  These can be scans of maitenance receipts, images, PDFs, etc.
 
-You create an attachment by uploading it using the POST /api/attachments route. Use the "file" input box type in HTML or use Postman's file option. Add a model identifier to the route and it's id in the query string to attache the file to that resource.
+You create an attachment by uploading it using the POST /api/attachments route. Use the "file" input box type in HTML or use Postman's file option. Add a query to the route of the form model=modelId to associate the attachment with the resource. The query string is required.
 
-For example, to attach a document to a vehicle (perhaps an image of the registration) you would to a POST request to /api/attachments/vehicle?id=vehicleId with the scan file included in the body of the message.
+For example, to attach a document to a vehicle (perhaps an image of the registration) you would to a POST request to /api/attachments?vehicle=vehicleId with the scan file included in the body of the message.
+
+maintenance-log and log are synonymous.
 
 On success you'll get back JSON in this form:
 ```

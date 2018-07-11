@@ -11,12 +11,23 @@ maintenanceLogRouter.post('/api/maintenance-logs', bearerAuthMiddleware, (reques
   if (!request.account) return next(new HttpErrors(400, 'POST MAINT LOG ROUTER: invalid request', { expose: false }));
   logger.log(logger.INFO, `.post /api/maintenance-logs req.body: ${request.body}`);
 
+  const qTag = Object.keys(request.query)[0]; /*eslint-disable-line*/
+  if (!qTag) {
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing vehicle ID query string', { expose: false }));
+  }
+
+  if (!['vehicle', 'v'].includes(qTag)) {
+    return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid tag in query: ${qTag}. Must be "vehicle" or "v".`, { expose: false }));
+  }
   MaintenanceLog.init()
     .then(() => {
-      return new MaintenanceLog({
+      const newLog = {
         ...request.body,
         profileId: request.profile._id,
-      }).save();
+        vehicleId: request.query[qTag],
+      };
+      console.log('^^^^^^^ log router newLog:', newLog);
+      return new MaintenanceLog(newLog).save();
     })
     .then((maintenanceLog) => {
       logger.log(logger.INFO, `POST MAINTENANCE_LOG_ROUTER: new maintenance log created with 200 code, ${JSON.stringify(maintenanceLog)}`);

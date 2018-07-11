@@ -31,14 +31,14 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     await removeAttProfAccntMock();
   });
 
-  describe('POST ROUTES TO /api/attachments/profile', () => {
+  describe('POST ROUTES TO /api/attachments', () => {
     test('POST 200', async () => {
       try {
-        const response = await superagent.post(`${apiUrl}/profile`)
+        const response = await superagent.post(apiUrl)
           .authBearer(token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile)
-          .query({ id: profile._id.toString() });
+          .query({ profile: profile._id.toString() });
         expect(response.status).toEqual(200);
         expect(response.body.originalName).toEqual('r1200.jpg');
         expect(response.body._id).toBeTruthy();
@@ -52,10 +52,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('POST 400 to /api/attachments with bad request', async () => {
       try {
-        const response = await superagent.post(`${apiUrl}/garage`)
+        const response = await superagent.post(apiUrl)
           .authBearer(token)
-          .field('weDontCareAboutThisField', 'R1200.JPG');
-          // .attach('attachment', testFile);
+          .field('weDontCareAboutThisField', 'R1200.JPG')
+          .attach('attachment', testFile)
+          .query({ });
         expect(response).toEqual('POST 400 unexpected response');
       } catch (err) {
         expect(err.status).toEqual(400);
@@ -64,11 +65,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     test('POST 401 to /api/attachments with bad token', async () => {
       try {
-        const response = await superagent.post(`${apiUrl}/vehicle`)
+        const response = await superagent.post(apiUrl)
           .authBearer('bad-token')
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile)
-          .query({ id: attachment._id.toString() });
+          .query({ vehicle: attachment._id.toString() });
         expect(response).toEqual('POST 401 unexpected response');
       } catch (err) {
         expect(err.status).toEqual(401);
