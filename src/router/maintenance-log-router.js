@@ -8,7 +8,7 @@ import Attachment from '../model/attachment';
 const maintenanceLogRouter = new Router();
 
 maintenanceLogRouter.post('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'POST MAINT LOG ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'POST MAINT LOG ROUTER: invalid request', { expose: false }));
   logger.log(logger.INFO, `.post /api/maintenance-logs req.body: ${request.body}`);
 
   const qTag = Object.keys(request.query)[0]; /*eslint-disable-line*/
@@ -37,11 +37,10 @@ maintenanceLogRouter.post('/api/maintenance-logs', bearerAuthMiddleware, (reques
 });
 
 maintenanceLogRouter.get('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'GET MAINTENANCE_LOG ROUTER: invalid request', { expose: false }));
-
+  if (!request.profile) return next(new HttpErrors(400, 'GET MAINTENANCE_LOG ROUTER: invalid request', { expose: false }));
   if (!request.query.id) return next(new HttpErrors(400, 'GET MAINTENANCELOG ROUTER: bad query', { expose: false }));
 
-  MaintenanceLog.findById({ _id: request.query.id })
+  MaintenanceLog.findById(request.query.id)
     .then((log) => {
       if (!log) return next(new HttpErrors(400, 'MAINTENANCELOG ROUTER GET: log not found', { expose: false }));
       return response.json(log);
@@ -52,7 +51,8 @@ maintenanceLogRouter.get('/api/maintenance-logs', bearerAuthMiddleware, (request
 
 // update route
 maintenanceLogRouter.put('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'PUT MAINT LOG ROUTER: invalid request', { expose: false }));
+  console.log('########## ', request.profile);
+  if (!request.profile) return next(new HttpErrors(400, 'PUT MAINT LOG ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'PUT MAINT LOG ROUTER: bad query', { expose: false }));
 
@@ -73,7 +73,7 @@ maintenanceLogRouter.put('/api/maintenance-logs', bearerAuthMiddleware, (request
 });
 
 maintenanceLogRouter.delete('/api/maintenance-logs', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'DELETE MAINTENANCE-LOG ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'DELETE MAINTENANCE-LOG ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE MAINTENANCE ROUTER: bad query', { expose: false }));
 

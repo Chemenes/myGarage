@@ -14,15 +14,11 @@ const apiUrl = `http://localhost:${process.env.PORT}/api`;
 describe('TESTING MAINT LOG ROUTER', () => {
   let mockData;
   let token;
-  // let vehicle;
-  // let profile;
   beforeAll(startServer);
   afterAll(stopServer);
   beforeEach(async () => {
-    // await removeAllResources(); 
     try {
       mockData = await createVehicleMockPromise(); 
-      // vehicle = mockData.vehicle; /*eslint-disable-line*/
       token = mockData.token; /*eslint-disable-line*/
     } catch (err) {
       return logger.log(logger.ERROR, `Unexpected error in vehicle-router beforeEach: ${err}`);
@@ -59,7 +55,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
       expect(response.body.attachments).toHaveLength(2);
     });
 
-    test('PUT 404 log entry not foud', async () => {
+    test('PUT 404 log entry not found', async () => {
       let response;
       const log = await createMaintenanceLogMockPromise();
       try {
@@ -87,10 +83,70 @@ describe('TESTING MAINT LOG ROUTER', () => {
       }
     });
 
+    test('PUT 400 on profile not found', async () => {
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      } 
+
+      let response;
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle;  /*eslint-disable-line*/
+      const maintenanceLog = await createMaintenanceLogMockPromise();
+      try {
+        response = await superagent.put(`${apiUrl}/maintenance-logs`)
+          .query({ id: vehicle._id })
+          .authBearer(loginResult.token)
+          .send(maintenanceLog);
+        expect(response).toEqual('PUT should have returned 400...');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('PUT 400 for bad query string', async () => {
+      const mockMaintenanceLog = {
+        description: faker.lorem.words(5),
+        dateOfService: new Date(),
+      };
+      try {
+        const response = await superagent.put(`${apiUrl}/maintenance-logs`) /*eslint-disable-line*/
+          .authBearer(mockData.token)
+          .query({ foo: mockData.vehicle._id.toString() })
+          .send(mockMaintenanceLog);
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+    
     test('PUT 401 bad token', async () => {
       let response;
       const mock = await createMaintenanceLogMockPromise();
-      const log = mock.maintenanceLog; /*eslint-disable-line*/
+        const log = mock.maintenanceLog; /*eslint-disable-line*/
       try {
         response = await superagent.put(`${apiUrl}/maintenance-logs`)
           .query({ id: log._id.toString() })
@@ -102,6 +158,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
       }
     });
   });
+
 
   describe('POST MAINT LOG ROUTE TESTING', () => {
     test('POST 200 to /api/maintenance-logs for successful log creation', async () => {
@@ -123,6 +180,36 @@ describe('TESTING MAINT LOG ROUTER', () => {
       expect(response.body.dateOfService).toBeTruthy(); // date format hard to compare
       expect(response.body.vehicleId).toEqual(mockData.vehicle._id.toString());
       expect(response.body.profileId).toBeTruthy();
+    });
+
+    test('POST 400 to /api/maintenance-logs for bad query string', async () => {
+      const mockMaintenanceLog = {
+        description: faker.lorem.words(5),
+        dateOfService: new Date(),
+      };
+      try {
+        const response = await superagent.post(`${apiUrl}/maintenance-logs`) /*eslint-disable-line*/
+          .authBearer(mockData.token)
+          .query({ foo: mockData.vehicle._id.toString() })
+          .send(mockMaintenanceLog);
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('POST 400 to /api/maintenance-logs for no query string', async () => {
+      const mockMaintenanceLog = {
+        description: faker.lorem.words(5),
+        dateOfService: new Date(),
+      };
+      try {
+        const response = await superagent.post(`${apiUrl}/maintenance-logs`) /*eslint-disable-line*/
+          .authBearer(mockData.token)
+          .query()
+          .send(mockMaintenanceLog);
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
     });
 
     test('POST 400 for trying to post a log with a bad token', async () => {
@@ -147,6 +234,53 @@ describe('TESTING MAINT LOG ROUTER', () => {
           .authBearer(token)
           .send(mockMaintenanceLog);
         expect(response.status).toEqual('ignored, should not reach this code.');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('POST 400 to /api/maintenance-logs for maintenance log with no profile', async () => {
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+
+      const mockGarage = {
+        name: faker.name.firstName(),
+        description: faker.lorem.words(20),
+        location: faker.name.firstName(),
+      };
+      let response;
+      
+      try {
+        response = await superagent.post(`${apiUrl}/maintenance-logs`)
+          .authBearer(loginResult.token)
+          .send(mockGarage);
+        expect(response).toEqual('Unexpected success where we should have failed on profile.');
       } catch (err) {
         expect(err.status).toEqual(400);
       }
@@ -179,6 +313,53 @@ describe('TESTING MAINT LOG ROUTER', () => {
       expect(response.body.profileId).toEqual(maintLog.profileId.toString());
       expect(response.body.dateOfService).toBeTruthy(); // date format hard to compare
       expect(response.body.attachments).toHaveLength(1);
+    });
+
+    test('GET 400 to /api/maintenace-logs for garage with no profile', async () => {
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+
+      const mockGarage = {
+        name: faker.name.firstName(),
+        description: faker.lorem.words(20),
+        location: faker.name.firstName(),
+      };
+      let response;
+      
+      try {
+        response = await superagent.get(`${apiUrl}/maintenance-logs`)
+          .authBearer(loginResult.token)
+          .send(mockGarage);
+        expect(response).toEqual('Unexpected success where we should have failed on profile.');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
     });
 
     test('GET 404 on LOG profileId not found', async () => {
@@ -235,6 +416,25 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err.status).toEqual(400);
       }
     });
+
+    test('GET 400 on bad query ID', async () => {
+      let maintLog;
+      try {
+        let mock = await createMaintenanceLogMockPromise();  /*eslint-disable-line*/
+        maintLog = mock.maintenanceLog; /*eslint-disable-line*/
+      } catch (err) {
+        throw err;
+      }
+      maintLog.description = faker.lorem.words(5);
+      let response; /*eslint-disable-line*/
+      try {
+        response = await superagent.get(`${apiUrl}/maintenance-logs`)
+          .query({ id: maintLog.profileId.toString() })
+          .authBearer(token);
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
   });
 
   describe('DELETE MAINTENANCE-LOG ROUTE TESTING', () => {
@@ -271,6 +471,50 @@ describe('TESTING MAINT LOG ROUTER', () => {
         await superagent.delete(`${apiUrl}/maintenance-Logs`)
           .authBearer(token);
         expect(true).toEqual('DELETE 400 missing query unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+    test('PUT 400 on profile not found', async () => {
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      } 
+
+      let response;
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle;  /*eslint-disable-line*/
+      const maintenanceLog = await createMaintenanceLogMockPromise();
+      try {
+        response = await superagent.delete(`${apiUrl}/maintenance-logs`)
+          .query({ id: vehicle._id })
+          .authBearer(loginResult.token)
+          .send(maintenanceLog);
+        expect(response).toEqual('PUT should have returned 400...');
       } catch (err) {
         expect(err.status).toEqual(400);
       }
