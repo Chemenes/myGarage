@@ -10,9 +10,6 @@ loadTestHelpers.create = (requestParams, context, ee, next) => {
   context.vars.email = faker.internet.email() + uuid();
   context.vars.password = faker.internet.password();
 
-  const saved = { username: context.vars.username, password: context.vars.password };
-  loadTestHelpers.savedData.push(saved);
-
   // properties from my profile schema
   context.vars.bio = faker.lorem.words(10);
   context.vars.firstName = faker.name.firstName() + uuid();
@@ -34,21 +31,19 @@ loadTestHelpers.create = (requestParams, context, ee, next) => {
   return next();
 }
 
-loadTestHelpers.savedData = [];
+loadTestHelpers.ctx = {};
 
 // afterResponse used on /api/signup to capture token
 loadTestHelpers.saveData = (requestParams, response, context, ee, next) => {
-  const saved = { username: context.username, password: context.password };
-  loadTestHelpers.savedData.push(saved);
+  loadTestHelpers.ctx = {
+    username: context.vars.username,
+    password: context.vars.password,
+  };
   return next();
 }
 
 
 loadTestHelpers.retrieveData = (requestParams, context, ee, next) => {
-  const data = loadTestHelpers.savedData.pop();
-  // context.vars.username = data ? data.username : 'nousername';
-  // context.vars.password = data ? data.password : 'nopassword';
-  // context.vars.b64 = btoa(`${data.username}:${data.password}`);
-  context.vars.b64 = data ? Buffer.from(`${data.username}:${data.password}`).toString('base64') : 'gobbledygook';
+  context.vars.b64 = Buffer.from(`${loadTestHelpers.ctx.username}:${loadTestHelpers.ctx.password}`).toString('base64');
   return next();
 }

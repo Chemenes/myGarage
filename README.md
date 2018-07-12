@@ -3,6 +3,15 @@
 
 [![Build Status](https://travis-ci.com/Chemenes/myGarage.svg?branch=master)](https://travis-ci.com/Chemenes/myGarage)
 
+## Table of Contents
+  - [myGarage Overview](#myGarage-Overview)
+  - [API Data Organization](#API-Data-Organization)
+  - [Collaborators and How to Contribute](#Collaborators)
+  - [API Documentation](#API-Routes-and-Documentation)
+  - [Load Testing Results](#Load-Testing-Analysis)
+
+### myGarage Overview
+
 MyGarage provides and API supporting the creation of vehicle-centric data stores and user interactions.  The API provides the following capabilities:
 
   - Secure signon and password storage
@@ -10,11 +19,9 @@ MyGarage provides and API supporting the creation of vehicle-centric data stores
   - User created vehicles organized in "garages"
   - All manner of vehicle types, from cars to airplanes
   - Vehicle maintenance tracking
-  - Scheduled maintenance reminders via SMS text message
-  - Ability to attach photos to vehicles
-  - Ability to attach scanned documents to vehicles and maintenance records
-  - Provision for formation of special-interest groups of vehicle owners (aka Clubs)
-  - And more...
+  - Ability to attach documents such as photos and document scans to all resources
+
+[Back to top](#Table-of-Contents)
 
 ### API Data Organization
 
@@ -26,7 +33,7 @@ The API is implemented using a collection of MondoDB document models:
   - Maintenance Logs
   - Attachments
 
-Relationships between models include:
+Relationships between models, depicted below, include:
 
 - One to One:
   - Account to Profile
@@ -36,6 +43,31 @@ Relationships between models include:
   - Garage to Vehicle
   - Garage, Vehicle and Profile to Attachment
   - Vehicle to Maintenance Log
+
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/myGarage-erd.jpg)
+
+[Back to top](#Table-of-Contents)
+
+### Collaborators
+
+MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler260), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
+
+### How to Contribute
+
+You'll need an account on github.com, an installation of node.js npm. Search google for instructions on how to install these tools on your system.
+
+Once you have the required prerequisites installed:
+
+- Fork [this repo](https://github.com/TCW417/MyGarage)
+- Clone it to your local machine
+- Do your work
+- Submit a pull request back to the source repo. Include a complete description of your proposed contribution.
+
+We're eager to see what you come up with! If you have any questions feel free to reach out to any one of the original team members.
+
+July, 2018, Seattle WA
+
+[Back to top](#Table-of-Contents)
 
 ### API Routes and Documentation
 
@@ -73,24 +105,7 @@ Click on a route to jump to its documentation
   - [/api/maintenance-logs](#DELETE-/api/maintenance-logs)
   - [/api/attachments](#DELETE-/api/attachments)
 
-### Collaborators
-
-MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler260), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
-
-### How to Contribute
-
-You'll need an account on github.com, an installation of node.js npm. Search google for instructions on how to install these tools on your system.
-
-Once you have the required prerequisites installed:
-
-- Fork [this repo](https://github.com/TCW417/MyGarage)
-- Clone it to your local machine
-- Do your work
-- Submit a pull request back to the source repo. Include a complete description of your proposed contribution.
-
-We're eager to see what you come up with! If you have any questions feel free to reach out to any one of the original team members.
-
-July, 2018, Seattle WA
+[Back to top](#Table-of-Contents)
 
 ## API DOCUMENTATION
 
@@ -482,3 +497,76 @@ Status 200 is returned on success, 400 for bad request, 401 for bad authenticati
 #### DELETE/api/attachments
 
 [Back to API TOC](#API-Routes-and-Documentation)
+
+### Load Testing Analysis
+
+The API was tested on the production environment hosted by Heroku with MongoDB provisioned by mLab. Note that both of these resources are of the "sandbox" or free variety so these results must be understood with that in mind. Provisioning the API with "paid" resources providing parallel execution of multiple server instances would significantly improve results.
+
+#### Test Approach
+
+One test lengthy flow was utilized. Sequential steps were:
+- Signup for a new account
+- Login to new account
+- Create new profile
+- Create new garage
+- Create new vehicle
+
+Three test phases were employed:
+- Warmup, 10 seconds at 50 RPS (Requests Per Second)
+- Ramp-up, 20 seconds going from 50 to 200 RPS
+- Full load, 30 seconds ast 200 RPS
+
+#### Results Summary
+
+| Summary | |
+|---------|-|
+| Test duration | 220 seconds |
+| Scenarios created | 9,049 |
+| Scenarios completed | 5,993 |
+| Requests completed | 41,386 |
+
+| Scenario Counts | |
+|-----------------|-|
+| Signup thru Vehicle | 9,049 (100%) |
+
+| HTML Code | Meaning | Count |
+|------|---------|-------|
+| 200 | Success | 40,660 |
+| 503 | Server error | 726 |
+
+| Errors | |
+|-------|-|
+| ECONNRESET | 2,413 |
+
+The 503 HTML codes and ECONNRESET errors are a result of the Heroku dyno (server instance) becoming overtaxed by the test.  
+
+##### Detailed Results
+
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/latency-distro.jpg)
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/latency-at-intervals.jpg)
+
+This chart shows the distribution of latency measurements for five categories.  Latency is a measure of the delay in processing server requests resulting from network delays. As such it is largely out of our control, beyond the possible upgrading of on-site networking equipment.  This should not be confused with response time, which is a measure of the end-to-end time from submission of a request to return of a result.  
+
+- MIN (too small to show up on the scale of this graph), 70.9ms
+- MAX 60.041 seconds
+- MEDIAN 14.575 seconds
+- P95 44.884 seconds (95% of users experienced this latence or better)
+- P99 55.246 seconds (99% of users experienced this latence or better)
+
+These results are not adequate for a production API. It is recommended that additional server resources be allocated for these tests to measure the effect.
+
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/concurrent-users.jpg)
+
+This chart depicts the total number of virtual users hitting the API as a function of test time.  The test ramped up the number of users from 10/second to 200/second over the course of 20 seconds. This chart demostrate is another indication of the latency increase caused by increased number of users hitting our limited server resources.
+
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/rps-results.jpg)
+
+These charts represent measurement of Responses Per Second (RPS) as seen by the load test suite.   You'll notice that the RPS rate peaked early in the test run and then declined steadily as the test progressed. The number of responses per second is directly related to the number of cores (Heroku dynos) allocated to the server, so one can expect this figure to improve directly with increased investment in server resources.
+
+![](https://github.com/Chemenes/myGarage/blob/master/load-testing/assets/http-codes.jpg)
+
+Finally, the HTTP Codes chart shows the distribution of codes returned by the server as a function of test run time. Given the conditions of the test and the resources provided for it, these results are not unexpected. 200 (Success) is by far the dominant result. 503 internal server errors arose once the test was fully underway and the single Heroku dyno became overwhelmed.
+
+##### Conclusion
+
+While these tests are exercising a limited portion of the capabilities of our API, the are representative of the responsiveness actual users are likely to see with the application deployed using free Infrastructure As A Service (IAAS) facilities.  Improvement in performance (if desired) can easily be achieved by increasing investment in IAAS resources.

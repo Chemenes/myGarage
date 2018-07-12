@@ -15,19 +15,19 @@
     },
     "phases": [
       {
-       "duration": 1,
-       "arrivalRate": 5,
+       "duration": 10,
+       "arrivalRate": 50,
        "name": "Warming up..."
       },
       {
-        "duration": 10,
-        "arrivalRate": 5,
-        "rampTo": 30,
+        "duration": 20,
+        "arrivalRate": 50,
+        "rampTo": 200,
         "name": "Ramping up to max load"
       },
       {
-        "duration": 10,
-        "arrivalRate": 30,
+        "duration": 30,
+        "arrivalRate": 200,
         "name": "Sustained max rate"
       }
     ],
@@ -41,6 +41,7 @@
           "post": {
             "url": "/api/signup",
             "beforeRequest": "create",
+            "afterResponse": "saveData",
             "json": {
               "username": "{{ username }}",
               "email": "{{ email }}",
