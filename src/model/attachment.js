@@ -4,7 +4,8 @@ import mongoose from 'mongoose';
 import Profile from './profile';
 import Garage from './garage';
 import Vehicle from './vehicle';
-import Logs from './maintenance-log';
+import Logs from './maintenance-log'; /*eslint-disable-line*/
+import { s3Remove } from '../lib/s3';
 
 const attachmentSchema = mongoose.Schema({
   originalName: { // from multer. original filename
@@ -32,7 +33,36 @@ const attachmentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
+  parentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+  parentModel: {
+    type: String,
+    required: true,
+  },
 }, { timestamps: true });
+
+attachmentSchema.post('remove', async (attachment) => {
+  // find attachment.parentId and remove attachment._id
+  // from it's attachments array
+  const models = {
+    profile: Profile,
+    garage: Garage,
+    vehicle: Vehicle,
+    maintenancelog: Logs,
+  };
+
+  models[attachment.parentModel.toLowerCase()].findById(attachment.parentId)
+    .then((parent) => {  
+      const idx = parent.attachments.indexOf(attachment._id);
+      parent.attachments.splice(idx, 1);
+    })
+    .then(() => {
+      return s3Remove(attachment.awsKey);
+    })
+    .catch();
+});
 
 attachmentSchema.methods.attach = async function attach(model, id) {
   const models = {
@@ -45,10 +75,6 @@ attachmentSchema.methods.attach = async function attach(model, id) {
     maintenancelog: Logs,
     l: Logs,
   };
-
-  // const result = await models[model].findOne({ _id: id });
-  // result.attachments.push(this._id)
-  // return result.save();
 
   let result;
   models[model].findOne({ _id: id })

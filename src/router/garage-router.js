@@ -35,7 +35,7 @@ garageRouter.get('/api/garages', bearerAuthMiddleware, (request, response, next)
 
   Garage.findOne({ _id: request.query.id })
     .then((garage) => {
-      if (!garage) return next(new HttpErrors(400, 'GARAGE ROUTER GET: garage not found', { expose: false }));
+      if (!garage) return next(new HttpErrors(404, 'GARAGE ROUTER GET: garage not found', { expose: false }));
       return response.json(garage);
     })
     .catch(next);
@@ -44,7 +44,7 @@ garageRouter.get('/api/garages', bearerAuthMiddleware, (request, response, next)
 
 // update route
 garageRouter.put('/api/garages', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'PUT GARAGE ROUTER: bad query', { expose: false }));
 
@@ -65,7 +65,7 @@ garageRouter.put('/api/garages', bearerAuthMiddleware, (request, response, next)
 });
 
 garageRouter.delete('/api/garages', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE GARAGE ROUTER: bad query', { expose: false }));
 

@@ -474,34 +474,44 @@ Status 200 is returned on success, 400 for bad request, 401 for bad authenticati
 [Back to API TOC](#API-Routes-and-Documentation)
 
 ### DELETE
+
 #### DELETE /api/accounts
-This request delete any accounts created by a user.
+
+This request will delete the logged in user's account along with all associated resources (profile, garages, vehicles, etc). It is irreversable. 
+
+To execute sign in then make a DELETE request to /api/accounts.
+
+Returns 200 on success, 401 if not authorized.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/profiles
-This process will successfully delete a users profile with a 200 status code.
 
-Status codes 404 will return if a profile is not found, 401 for a bad request and 404 for bad authentication.
+This route will delete a users profile and all underlying resources (garages, vehicles, attachments, etc). On success returns 200 status code.
+
+Status codes 404 will return if a profile is not found, 401 for a bad request and 401 for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/garages
-This process will successfully delete a users garage with a 200 status code.
+
+This route will delete a users garage and all associated vehicles, maintenance logs and attachments. On success it returns a 200 status code.
 
 Status codes 404 will return if a garage is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/vehicles
-This process will successfully delete a users vehicle with a 200 status code.
+
+This route will delete a users vehicle along with associated maintenance records and attachments. On success it returns a 200 status code.
 
 Status codes 404 will return if a vehicle is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/maintenance-logs
-This process will successfully delete a users maintenance log(Documented time spent fixing car) with a 200 status code.
+
+This route will delete a maintenance log entry along with any associated attachments. On success it will return a 200 status code.
 
 Status codes 404 will return if a log is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
@@ -509,7 +519,14 @@ Status codes 404 will return if a log is not found, 401 for a missing token and 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE/api/attachments
-This process will successfully delete a users attachments(Any images, reciepts, maps, ect associated with user) with a 200 status code.
+
+This route will delete an attachment. On success it returns a 200 status code.
+
+The route takes a query:
+```
+ /api/attachments?id=attachmentId
+```
+where attachmentId is the database ID of the attachment to be removed.
 
 Status codes 404 will return if a attachment is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 

@@ -43,6 +43,8 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
         url,
         awsKey: key,
         profileId: request.profile._id,
+        parentId: request.query[modelName],
+        parentModel: modelName,
       }).save();
     })
     .then((newAttachment) => {
@@ -81,15 +83,22 @@ attachmentRouter.delete('/api/attachments', bearerAuthMiddleware, (request, resp
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: missing model ID query', { expose: false }));
   }
   
+  let key;
   return Attachment.findById(request.query.id)
     .then((attachment) => {
+      console.log('... att found', attachment);
       if (!attachment) return next(new HttpErrors(404, 'ATTACHMENT ROUTER DELETE: attachment not found in database', { expose: false }));
-      const key = attachment.awsKey;
+      key = attachment.awsKey;
+      console.log('... calling .remove parent:', attachment.parentModel);
+      return attachment.remove();
+    })
+    .then(() => {
+      console.log('... s3Remove on ', key);
       return s3Remove(key);
     })
-    .then((result) => {
-      logger.log(logger.INFO, `ATTACHMENT ROUTER DELETE: successfully deleted book cover ${JSON.stringify(result, null, 2)}`);
-      return response.json(result);
+    .then(() => {
+      logger.log(logger.INFO, 'ATTACHMENT ROUTER DELETE: successfully deleted attachment');
+      return response.sendStatus(200);
     })    
     .catch(next);
 });

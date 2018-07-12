@@ -235,24 +235,24 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err.status).toEqual(400);
       }
     });
+  });
 
-    describe('DELETE MAINTENANCE-LOG ROUTE TESTING', () => {
-      test('DELETE 200 success', async () => {
-        const mock = await
-        createMaintenanceLogMockPromise();
-        const maintenanceLog = mock.maintenanceLog; /*eslint-disable-line*/
-        let response;
-        try {
-          response = await superagent.put(`${apiUrl}/maintenance-Logs`)
-            .query({ id: maintenanceLog._id.toString() })
-            .authBearer(token);
-          expect(response).toEqual('We should have failed with a 400');
-        } catch (err) {
-          expect(err.status).toEqual(400);
-        }
-      });
+  describe('DELETE MAINTENANCE-LOG ROUTE TESTING', () => {
+    test('DELETE 200 success mock with attachment', async () => {
+      const mock = await
+      createMaintenanceLogMockPromise();
+      const maintenanceLog = mock.maintenanceLog; /*eslint-disable-line*/
+      let response;
+      try {
+        response = await superagent.delete(`${apiUrl}/maintenance-Logs`)
+          .query({ id: maintenanceLog._id.toString() })
+          .authBearer(token);
+      } catch (err) {
+        expect(err).toEqual('Delete log should have worked. failed!');
+      }
+      expect(response.status).toEqual(200);
     });
-
+  
     test('DELETE 404 not found', async () => {
       let response;
       try {
@@ -265,6 +265,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err.status).toEqual(404);
       }
     });
+
     test('DELETE 400 bad request', async () => {
       try {
         await superagent.delete(`${apiUrl}/maintenance-Logs`)

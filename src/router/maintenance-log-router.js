@@ -77,12 +77,22 @@ maintenanceLogRouter.delete('/api/maintenance-logs', bearerAuthMiddleware, (requ
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE MAINTENANCE ROUTER: bad query', { expose: false }));
 
+  let foundLog;
   MaintenanceLog.init()
     .then(() => {
-      return MaintenanceLog.remove({ _id: request.query.id });
+      return MaintenanceLog.findById(request.query.id);
+    })
+    .then((log) => {
+      foundLog = log;
+      // remove all attachments with this logs id
+      return Attachment.remove({ parentId: log._id });
     })
     .then(() => {
-      return Attachment.remove({ vehicleId: request.query.id });
+      // remove the mogoose log object
+      return foundLog.remove();
+    })
+    .then(() => {
+      return response.sendStatus(200);
     })
     .catch(next);
   return undefined;

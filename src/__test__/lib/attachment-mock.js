@@ -1,7 +1,7 @@
 
 import faker from 'faker';
 import Attachment from '../../model/attachment';
-
+// import Profile from '../../model/profile';
 import { createProfileMockPromise, removeAllResources } from './profile-mock';
 
 const createAttachmentMockPromise = async () => {
@@ -20,6 +20,8 @@ const createAttachmentMockPromise = async () => {
     url: faker.random.image(),
     awsKey: 'multer-hashed-filename.originalName',
     profileId: mockData.profile._id,
+    parentId: mockData.profile._id,
+    parentModel: 'Profile',
   }).save();
   
   mockData.attachment = attachment;

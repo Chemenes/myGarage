@@ -15,18 +15,18 @@
     },
     "phases": [
       {
-       "duration": 10,
+       "duration": 3,
        "arrivalRate": 50,
        "name": "Warming up..."
       },
       {
-        "duration": 20,
+        "duration": 10,
         "arrivalRate": 50,
         "rampTo": 200,
         "name": "Ramping up to max load"
       },
       {
-        "duration": 30,
+        "duration": 20,
         "arrivalRate": 200,
         "name": "Sustained max rate"
       }
