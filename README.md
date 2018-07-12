@@ -475,26 +475,43 @@ Status 200 is returned on success, 400 for bad request, 401 for bad authenticati
 
 ### DELETE
 #### DELETE /api/accounts
+This request delete any accounts created by a user.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/profiles
+This process will successfully delete a users profile with a 200 status code.
+
+Status codes 404 will return if a profile is not found, 401 for a bad request and 404 for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/garages
+This process will successfully delete a users garage with a 200 status code.
+
+Status codes 404 will return if a garage is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/vehicles
+This process will successfully delete a users vehicle with a 200 status code.
+
+Status codes 404 will return if a vehicle is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE /api/maintenance-logs
+This process will successfully delete a users maintenance log(Documented time spent fixing car) with a 200 status code.
+
+Status codes 404 will return if a log is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
+
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
 #### DELETE/api/attachments
+This process will successfully delete a users attachments(Any images, reciepts, maps, ect associated with user) with a 200 status code.
+
+Status codes 404 will return if a attachment is not found, 401 for a missing token and 400 for a bad request and for bad authentication.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
@@ -570,3 +587,4 @@ Finally, the HTTP Codes chart shows the distribution of codes returned by the se
 ##### Conclusion
 
 While these tests are exercising a limited portion of the capabilities of our API, the are representative of the responsiveness actual users are likely to see with the application deployed using free Infrastructure As A Service (IAAS) facilities.  Improvement in performance (if desired) can easily be achieved by increasing investment in IAAS resources.
+
