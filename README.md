@@ -50,7 +50,7 @@ Relationships between models, depicted below, include:
 
 ### Collaborators
 
-MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler260), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
+MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler26), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
 
 ### How to Contribute
 
