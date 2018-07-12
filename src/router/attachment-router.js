@@ -86,14 +86,11 @@ attachmentRouter.delete('/api/attachments', bearerAuthMiddleware, (request, resp
   let key;
   return Attachment.findById(request.query.id)
     .then((attachment) => {
-      console.log('... att found', attachment);
       if (!attachment) return next(new HttpErrors(404, 'ATTACHMENT ROUTER DELETE: attachment not found in database', { expose: false }));
       key = attachment.awsKey;
-      console.log('... calling .remove parent:', attachment.parentModel);
       return attachment.remove();
     })
     .then(() => {
-      console.log('... s3Remove on ', key);
       return s3Remove(key);
     })
     .then(() => {

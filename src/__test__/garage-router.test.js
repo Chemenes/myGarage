@@ -326,7 +326,7 @@ describe('TESTING ROUTER PROFILE', () => {
     });
 
     test('PUT 404 on profile not found', async () => {
-            //
+      //
       // Create account /api/signup
       //
       const testUsername = faker.internet.userName();
