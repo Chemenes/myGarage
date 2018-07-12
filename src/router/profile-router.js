@@ -13,8 +13,6 @@ const profileRouter = new Router();
 
 profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
   logger.log(logger.INFO, `.post /api/profiles req.body: ${request.body}`);
-  if (!request.account) return next(new HttpErrors(400, 'POST PROFILE_ROUTER: invalid request', { expose: false }));
-
   Profile.init()
     .then(() => {
       return new Profile({
@@ -31,15 +29,12 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
 });
 
 profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'GET PROFILE ROUTER: invalid request. Not logged in.', { expose: false }));
-
   if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));
 
   Profile.init()
     .then(() => {
       Profile.findOne({ _id: request.profile._id.toString() })
         .then((profile) => {
-          if (!profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found', { expose: false }));
           return response.json(profile);
         });
       return undefined;
@@ -50,8 +45,6 @@ profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, nex
 
 // update route
 profileRouter.put('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'PUT PROFILE ROUTER: invalid request', { expose: false }));
-
   if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));
 
   if (!Object.keys(request.body).length) return next(new HttpErrors(400, 'PUT PROFILE ROUTER: Missing request body', { expose: false }));
@@ -71,8 +64,6 @@ profileRouter.put('/api/profiles', bearerAuthMiddleware, (request, response, nex
 });
 
 profileRouter.delete('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'DELETE PROFILE ROUTER: invalid request', { expose: false }));
-
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE PROFILE ROUTER: bad query', { expose: false }));
 
   Profile.init()
