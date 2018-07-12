@@ -52,6 +52,60 @@ describe('TESTING ROUTER PROFILE', () => {
       expect(response.body.location).toEqual(mockGarage.location);
     });
 
+    test('POST 400 to /api/garages for garage with no profile', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+
+      const mockGarage = {
+        name: faker.name.firstName(),
+        description: faker.lorem.words(20),
+        location: faker.name.firstName(),
+      };
+      let response;
+      
+      try {
+        response = await superagent.post(`${apiUrl}/garages`)
+          .authBearer(loginResult.token)
+          .send(mockGarage);
+        expect(response).toEqual('Unexpected success where we should have failed on profile.');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+
     test('POST 400 for trying to post a garage with a bad token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/garages`)
@@ -101,22 +155,60 @@ describe('TESTING ROUTER PROFILE', () => {
       expect(response.body.profileId).toEqual(mockGarageData.garage.profileId.toString());
     });
 
-    test('GET 404 on garage profileId not found', async () => {
-      let garage;
+    test('GET 404 on garage garageId not found', async () => {    
       try {
-        garage = await createGarageMockPromise();
-      } catch (err) {
-        throw err;
-      }
-      garage.profileId = '1234567890';
-      let response;
-      try {
-        response = await superagent.get(`${apiUrl}/garages`)
-          .query({ id: garage.profileId })
+        const response = await superagent.get(`${apiUrl}/garages`)
+          .query({ id: profile._id.toString() })
           .authBearer(token);
         expect(response.status).toEqual('We should not reach this code GET 404');
       } catch (err) {
         expect(err.status).toEqual(404);
+      }
+    });
+
+    test('GET 400 on no profile found', async () => { 
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      } 
+
+      try {
+        const response = await superagent.get(`${apiUrl}/garages`)
+          .query({ id: profile._id.toString() })
+          .authBearer(loginResult.token);
+        expect(response.status).toEqual('We should not reach this code GET 400');
+      } catch (err) {
+        expect(err.status).toEqual(400);
       }
     });
 
@@ -224,7 +316,7 @@ describe('TESTING ROUTER PROFILE', () => {
       const garage = await createGarageMockPromise();
       try {
         response = await superagent.put(`${apiUrl}/garages`)
-          .query({ id: '123432123551234234' })
+          .query({ id: profile._id })
           .authBearer(token)
           .send(garage);
         expect(response).toEqual('PUT should have returned 404...');
@@ -233,7 +325,56 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
 
-    test('PUT 400 bad request', async () => {
+    test('PUT 404 on profile not found', async () => {
+            //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      } 
+
+      let response;
+      const garage = await createGarageMockPromise();
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .query({ id: profile._id })
+          .authBearer(loginResult.token)
+          .send(garage);
+        expect(response).toEqual('PUT should have returned 400...');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('PUT 400 bad request: Missing body', async () => {
       let response;
       const mock = await createGarageMockPromise();
       const garage = mock.garage; /*eslint-disable-line*/

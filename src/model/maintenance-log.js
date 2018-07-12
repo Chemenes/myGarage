@@ -2,6 +2,7 @@
 
 import mongoose from 'mongoose';
 import Vehicle from './vehicle';
+import Attachment from './attachment';/*eslint-disable-line*/
 
 const maintenanceLogSchema = mongoose.Schema({
   description: {
@@ -36,6 +37,21 @@ maintenanceLogSchema.post('save', (log) => {
     .catch((err) => {
       throw err;
     });
+});
+
+maintenanceLogSchema.post('remove', async (log) => {
+  Vehicle.findById(log.vehicleId)
+    .then((vehicle) => {
+      const idx = vehicle.maintenanceLogs.indexOf(log._id);
+      vehicle.maintenanceLogs.splice(idx, 1);
+    })
+    .then(() => {
+      // remove all attachments to log
+      for (let i = 0; i < log.attachments.length; i++) {
+        Attachment.remove({ _id: log.attachments[i] });
+      }
+    })
+    .catch();
 });
 
 const skipInit = process.env.NODE_ENV === 'development';
