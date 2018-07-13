@@ -1,6 +1,7 @@
 import superagent from 'superagent';
 import bearerAuth from 'superagent-auth-bearer';
 import faker from 'faker';
+// import tu from './lib/test-utils';
 import { startServer, stopServer } from '../lib/server';
 import { createGarageMockPromise } from './lib/garage-mock';
 import { createVehicleMockPromise, removeAllResources } from './lib/vehicle-mock';/*eslint-disable-line*/
@@ -58,14 +59,69 @@ describe('TESTING VEHICLE ROUTER', () => {
       expect(response.body.profileId).toEqual(garage.profileId.toString());
     });
 
-    test('POST 400 for trying to post a vehicle with a bad token', async () => {
+    test('POST 400 post vehicle without profile', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let newToken;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        newToken = response.body.token;
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+      
+      // const newToken = await tu.getNewAuthToken();
+
+      try {
+        const response = await superagent.post(`${apiUrl}/vehicles`)
+          .authBearer(newToken)
+          .query({ garage: garage._id.toString() });
+        expect(response).toEqual('POST 400 in try block. Shouldn\'t be executed.');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('POST 401 for trying to post a vehicle with a bad/missing token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/vehicles`)
           .query({ garage: garage._id })
-          .set('Authorization', 'Bearer THISABADTOKEN');
-        expect(response).toEqual('POST 400 in try block. Shouldn\'t be executed.');
+          .authBearer('THISABADTOKEN');
+        expect(response).toEqual('POST 401 in try block. Shouldn\'t be executed.');
       } catch (err) {
         expect(err.status).toEqual(401);
+      }
+    });
+
+    test('POST 400 for bad query', async () => {
+      try {
+        const response = await superagent.post(`${apiUrl}/vehicles`)
+          .query({ foo: garage._id })
+          .authBearer(token);
+        expect(response).toEqual('POST 400 in try block. Shouldn\'t be executed.');
+      } catch (err) {
+        expect(err.status).toEqual(400);
       }
     });
 
@@ -110,22 +166,52 @@ describe('TESTING VEHICLE ROUTER', () => {
       expect(response.body.profileId).toEqual(mockVehicleData.vehicle.profileId.toString());
     });
 
-    test('GET 404 on vehicle profileId not found', async () => {
+    test('GET 400 on no user profile', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let newToken;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        newToken = response.body.token;
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+            
       let vehicle;
       try {
         vehicle = await createVehicleMockPromise();
       } catch (err) {
         throw err;
       }
-      vehicle.profileId = '1234567890';
       let response;
       try {
         response = await superagent.get(`${apiUrl}/vehicles`)
-          .query({ id: vehicle.profileId })
-          .authBearer(token);
-        expect(response.status).toEqual('We should not reach this code GET 404');
+          .query({ id: vehicle.vehicle._id })
+          .authBearer(newToken);
+        expect(response.status).toEqual('We should not reach this code GET 400');
       } catch (err) {
-        expect(err.status).toEqual(404);
+        expect(err.status).toEqual(400);
       }
     });
 
@@ -144,6 +230,24 @@ describe('TESTING VEHICLE ROUTER', () => {
         expect(response.status).toEqual('We should not reach this code GET 404');
       } catch (err) {
         expect(err.status).toEqual(401);
+      }
+    });
+
+    test('GET 400 on vehicle not found', async () => {
+      let vehicle;
+      try {
+        vehicle = await createVehicleMockPromise();
+      } catch (err) {
+        throw err;
+      }
+      let response;
+      try {
+        response = await superagent.get(`${apiUrl}/vehicles`)
+          .query({ id: vehicle.vehicle.profileId.toString() })
+          .authBearer(token);
+        expect(response.status).toEqual('We should not reach this code GET 404');
+      } catch (err) {
+        expect(err.status).toEqual(404);
       }
     });
 
@@ -195,12 +299,57 @@ describe('TESTING VEHICLE ROUTER', () => {
       expect(response.body.attachments).toHaveLength(1);
     });
 
-    test('PUT 404 vehicle not foud', async () => {
+    test('PUT 400 no profile', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
+
+      //
+      // use new account to log in
+      //
+      let newToken;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        newToken = response.body.token;
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+
       let response;
       const vehicle = await createVehicleMockPromise();
       try {
         response = await superagent.put(`${apiUrl}/vehicles`)
-          .query({ id: '123432123551234234' })
+          .query({ id: vehicle.vehicle._id.toString() })
+          .authBearer(newToken)
+          .send(vehicle.vehicle);
+        expect(response).toEqual('PUT should have returned 400...');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+            
+    test('PUT 404 vehicle not found', async () => {
+      let response;
+      const vehicle = await createVehicleMockPromise();
+      try {
+        response = await superagent.put(`${apiUrl}/vehicles`)
+          .query({ id: vehicle.vehicle.profileId.toString() })
           .authBearer(token)
           .send(vehicle);
         expect(response).toEqual('PUT should have returned 404...');
@@ -209,13 +358,29 @@ describe('TESTING VEHICLE ROUTER', () => {
       }
     });
 
-    test('PUT 400 bad request', async () => {
+    test('PUT 400 bad query request', async () => {
+      let response;
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle; /*eslint-disable-line*/
+      try {
+        response = await superagent.put(`${apiUrl}/vehicles`)
+          .query({ foo: vehicle._id.toString() })
+          .send(vehicle)
+          .authBearer(token);
+        expect(response).toEqual('We should have failed with a 400');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('PUT 400 missing request body', async () => {
       let response;
       const mock = await createVehicleMockPromise();
       const vehicle = mock.vehicle; /*eslint-disable-line*/
       try {
         response = await superagent.put(`${apiUrl}/vehicles`)
           .query({ id: vehicle._id.toString() })
+          .send({})
           .authBearer(token);
         expect(response).toEqual('We should have failed with a 400');
       } catch (err) {
@@ -239,13 +404,60 @@ describe('TESTING VEHICLE ROUTER', () => {
       }
     });
 
+    test('DELETE 400 profile not found', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
 
-    test('DELETE 404 not found', async () => {
+      //
+      // use new account to log in
+      //
+      let newToken;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        newToken = response.body.token;
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
+
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle;/*eslint-disable-line*/
       let response;
       try {
         response = await
         superagent.delete(`${apiUrl}/vehicles`)
-          .query({ id: '3904209384290' })
+          .query({ id: vehicle._id.toString() })
+          .authBearer(newToken);
+        expect(response).toEqual('DELETE 400 expected but not received');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('DELETE 404 not found', async () => {
+      const mock = await createVehicleMockPromise();
+      const vehicle = mock.vehicle;/*eslint-disable-line*/
+      let response;
+      try {
+        response = await
+        superagent.delete(`${apiUrl}/vehicles`)
+          .query({ id: vehicle.profileId.toString() })
           .authBearer(token);
         expect(response).toEqual('DELETE 404 expected but not received');
       } catch (err) {

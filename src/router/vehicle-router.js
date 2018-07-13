@@ -45,7 +45,7 @@ vehicleRouter.get('/api/vehicles', bearerAuthMiddleware, (request, response, nex
 
   Vehicle.findOne({ _id: request.query.id })
     .then((vehicle) => {
-      if (!vehicle) return next(new HttpErrors(400, 'VEHICLE ROUTER GET: vehicle not found', { expose: false }));
+      if (!vehicle) return next(new HttpErrors(404, 'VEHICLE ROUTER GET: vehicle not found', { expose: false }));
       return response.json(vehicle);
     })
     .catch(next);
@@ -54,7 +54,7 @@ vehicleRouter.get('/api/vehicles', bearerAuthMiddleware, (request, response, nex
 
 // update route
 vehicleRouter.put('/api/vehicles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'PUT VEHICLE ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'PUT VEHICLE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'PUT VEHICLE ROUTER: bad query', { expose: false }));
 
@@ -65,6 +65,7 @@ vehicleRouter.put('/api/vehicles', bearerAuthMiddleware, (request, response, nex
       return Vehicle.findOneAndUpdate({ _id: request.query.id }, request.body);
     })
     .then((vehicle) => {
+      if (!vehicle) return next(new HttpErrors(404, 'PUT VEHICLE ROUTER: vehicle not found', { expose: false }));
       return Vehicle.findOne(vehicle._id);
     })
     .then((vehicle) => {
@@ -75,7 +76,7 @@ vehicleRouter.put('/api/vehicles', bearerAuthMiddleware, (request, response, nex
 });
 
 vehicleRouter.delete('/api/vehicles', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: invalid request', { expose: false }));
 
   if (!request.query.id) return next(new HttpErrors(400, 'DELETE VEHICLE ROUTER: bad query', { expose: false }));
 
@@ -83,11 +84,15 @@ vehicleRouter.delete('/api/vehicles', bearerAuthMiddleware, (request, response, 
     .then(() => {
       return Vehicle.remove({ _id: request.query.id });
     })
-    .then(() => {
+    .then((result) => {
+      // result = { n: <num removed>, ok: 1|0 }
+      if (!result.n) return next(new HttpErrors(404, 'DELETE VEHICLE ROUTER: garage ID not found', { expose: false }));
       return Attachment.remove({ vehicleId: request.query.id });
     })
     .then(() => {
-      MaintenanceLog.remove({ vehicleId: request.query.id });
+      return MaintenanceLog.remove({ vehicleId: request.query.id });
+    })
+    .then(() => {
       return response.sendStatus(200);
     })
     .catch(next);

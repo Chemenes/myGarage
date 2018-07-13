@@ -325,7 +325,7 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
 
-    test('PUT 404 on profile not found', async () => {
+    test('PUT 400 on profile not found', async () => {
       //
       // Create account /api/signup
       //
@@ -374,6 +374,20 @@ describe('TESTING ROUTER PROFILE', () => {
       }
     });
 
+    test('PUT 400 bad request: missing Query', async () => {
+      let response;
+      const mock = await createGarageMockPromise();
+      const garage = mock.garage; /*eslint-disable-line*/
+      try {
+        response = await superagent.put(`${apiUrl}/garages`)
+          .send(garage)
+          .authBearer(token);
+        expect(response).toEqual('We should have failed with a 400');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
     test('PUT 400 bad request: Missing body', async () => {
       let response;
       const mock = await createGarageMockPromise();
@@ -387,64 +401,110 @@ describe('TESTING ROUTER PROFILE', () => {
         expect(err.status).toEqual(400);
       }
     });
+  });
 
-    describe('DELETE GARAGE ROUTE TESTING', () => {
-      test('DELETE 200 success', async () => {
-        const mock = await createGarageMockPromise();
-        const garage = mock.garage; /*eslint-disable-line*/
-        let response;
-        try {
-          response = await superagent.delete(`${apiUrl}/garages`)
-            .query({ id: profile._id.toString() })
-            .authBearer(token);
-          expect(response.status).toEqual(200);
-        } catch (err) {
-          expect(err).toEqual('Unexpected error on valid delete test');
-        }
-      });
+  describe('DELETE GARAGE ROUTE TESTING', () => {
+    test('DELETE 200 success', async () => {
+      const mock = await createGarageMockPromise();
+      const garage = mock.garage; /*eslint-disable-line*/
+      let response;
+      try {
+        response = await superagent.delete(`${apiUrl}/garages`)
+          .query({ id: garage._id.toString() })
+          .authBearer(token);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error on valid delete test');
+      }
+    });
 
-      test('DELETE 404 not found', async () => {
-        let response;
-        try {
-          response = await superagent.delete(`${apiUrl}/garages`)
-            .query({ id: '1234568909876543321' })
-            .authBearer(token);
-          expect(response).toEqual('DELETE 404 expected but not received');
-        } catch (err) {
-          expect(err.status).toEqual(404);
-        }
-      });
+    test('DELETE 404 not found', async () => {
+      let response;
+      try {
+        response = await superagent.delete(`${apiUrl}/garages`)
+          .query({ id: profile._id.toString() })
+          .authBearer(token);
+        expect(response).toEqual('DELETE 404 expected but not received');
+      } catch (err) {
+        expect(err.status).toEqual(404);
+      }
+    });
 
-      test('DELETE 400 bad request', async () => {
-        try {
-          await superagent.delete(`${apiUrl}/garages`)
-            .authBearer(token);
-          expect(true).toEqual('DELETE 400 missing query unexpected success');
-        } catch (err) {
-          expect(err.status).toEqual(400);
-        }
-      });
+    test('DELETE 400 bad request: missing profile', async () => {
+      //
+      // Create account /api/signup
+      //
+      const testUsername = faker.internet.userName();
+      const testPassword = faker.lorem.words(2);
+      const testEmail = faker.internet.email();
+      const mockAccount = {
+        username: testUsername,
+        email: testEmail,
+        password: testPassword,
+      };
+      
+      try {
+        const response = await superagent.post(`${apiUrl}/signup`)
+          .send(mockAccount);
+        expect(response.status).toEqual(200);
+      } catch (err) {
+        expect(err).toEqual('Unexpected error testing good signup.');
+      }
 
-      test('DELETE 401 bad token', async () => {
-        try {
-          await superagent.delete(`${apiUrl}/garages`)
-            .query({ id: 'thiswontbereached' })
-            .authBearer('badtoken');
-          expect(true).toEqual('DELETE 401 expected but succeeded');
-        } catch (err) {
-          expect(err.status).toEqual(401);
-        }
-      });
+      //
+      // use new account to log in
+      //
+      let loginResult;  
+      try {
+        const response = await superagent.get(`${apiUrl}/login`)
+          .auth(testUsername, testPassword); 
+        loginResult = response.body;
+        expect(response.status).toEqual(200);
+        expect(response.body.token).toBeTruthy();
+        expect(response.body.profileId).toBeNull();
+      } catch (err) {
+        expect(err.status).toEqual('Unexpected error response from valid signIn');
+      }
 
-      test('DELETE 400 missing token', async () => {
-        try {
-          await superagent.delete(`${apiUrl}/garages`)
-            .query({ id: 'thiswontbereached' });
-          expect(true).toEqual('DELETE 400 expected but succeeded');
-        } catch (err) {
-          expect(err.status).toEqual(400);
-        }
-      });
+      try {
+        await superagent.delete(`${apiUrl}/garages`)
+          .authBearer(loginResult.token)
+          .query({ id: profile._id.toString() });
+        expect(true).toEqual('DELETE 400 missing profile unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('DELETE 400 bad request: missing query', async () => {
+      try {
+        await superagent.delete(`${apiUrl}/garages`)
+          .authBearer(token);
+        expect(true).toEqual('DELETE 400 missing query unexpected success');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
+    });
+
+    test('DELETE 401 bad token', async () => {
+      try {
+        await superagent.delete(`${apiUrl}/garages`)
+          .query({ id: 'thiswontbereached' })
+          .authBearer('badtoken');
+        expect(true).toEqual('DELETE 401 expected but succeeded');
+      } catch (err) {
+        expect(err.status).toEqual(401);
+      }
+    });
+
+    test('DELETE 400 missing token', async () => {
+      try {
+        await superagent.delete(`${apiUrl}/garages`)
+          .query({ id: 'thiswontbereached' });
+        expect(true).toEqual('DELETE 400 expected but succeeded');
+      } catch (err) {
+        expect(err.status).toEqual(400);
+      }
     });
   });
 });

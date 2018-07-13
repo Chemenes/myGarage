@@ -50,7 +50,7 @@ Relationships between models, depicted below, include:
 
 ### Collaborators
 
-MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler260), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
+MyGarage is the creation of [Devin Cunningham](https://github.com/DevinTyler26), [Chris Hemenes](https://github.com/Chemenes) and [Tracy Williams](https://github.com/TCW417).  We welcome others to join us in building out the capabilities of this API!  Here's how:
 
 ### How to Contribute
 
@@ -66,6 +66,12 @@ Once you have the required prerequisites installed:
 We're eager to see what you come up with! If you have any questions feel free to reach out to any one of the original team members.
 
 July, 2018, Seattle WA
+
+### Test Out MyGarage API
+MyGarage is live on Swagger.io! [Click here](https://app.swaggerhub.com/apis/DevinTyler26/myGarageAPI/1.0.0#/) to test is out.
+1. Choose the signup POST route to receive a unique token. Remember your username and password.
+2. Click the "Authorize" button and input your username, password, and token.
+3. Test out the paths!
 
 [Back to top](#Table-of-Contents)
 

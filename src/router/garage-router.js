@@ -71,13 +71,17 @@ garageRouter.delete('/api/garages', bearerAuthMiddleware, (request, response, ne
 
   Garage.init()
     .then(() => {
-      return Garage.remove({ profileId: request.query.id });
+      return Garage.remove({ _id: request.query.id });
     })
-    .then(() => {
+    .then((result) => {
+      // result = { n: <num removed>, ok: 1|0 }
+      if (!result.n) return next(new HttpErrors(404, 'DELETE VEHICLE ROUTER: garage ID not found', { expose: false }));
       return Attachment.remove({ profileId: request.query.id });
     })
     .then(() => {
-      MaintenanceLog.remove({ profileId: request.query.id });
+      return MaintenanceLog.remove({ profileId: request.query.id });
+    })
+    .then(() => {
       return response.sendStatus(200);
     })
     .catch(next);
