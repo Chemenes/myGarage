@@ -17,12 +17,10 @@ const s3Upload = (path, key) => {
     .then((response) => {
       s3response = response;
       logger.log(logger.INFO, `RECEIVED RESPONSE FROM AWS: ${JSON.stringify(response, null, 2)}`);
-      console.log('aaaaaaaa s3Uld path', path);
       return fs.remove(path);
     })
     .then(() => s3response.Location)
     .catch((err) => {
-      console.log('aaaaaaaa (error) s3Uld path', path);
       return fs.remove(path)
         .then(() => Promise.reject(err))
         .catch(fsErr => Promise.reject(fsErr)); 

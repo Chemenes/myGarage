@@ -1,4 +1,5 @@
 import multer from 'multer';
+// import fs from 'fs-extra';
 import { Router } from 'express';
 import HttpErrors from 'http-errors';
 import bearerAuthMiddleware from '../lib/middleware/bearer-auth-middleware';
@@ -10,7 +11,8 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 
 const attachmentRouter = new Router();
 
-attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
+const attachmentRouterPostMw = (request, response, next) => {
+// attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: no profile created.', { expose: false }));
 
   const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
@@ -22,11 +24,16 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
     return next(new HttpErrors(400, `ATTACHMENT ROUTER POST ERROR: invalid model in query: ${modelName}`, { expose: false }));
   }
 
+  return next();
+};
+
+attachmentRouter.post('/api/attachments', bearerAuthMiddleware, attachmentRouterPostMw, multerUpload.any(), (request, response, next) => {
   if (request.files.length !== 1) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request, missing file.', { expose: false }));
   }
-
   const [file] = request.files;
+
+  const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
 
   logger.log(logger.INFO, `ATTACHMENT ROUTER POST: valid file ready to to upload: ${JSON.stringify(file, null, 2)}`);
 

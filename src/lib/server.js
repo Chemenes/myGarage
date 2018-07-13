@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import HttpError from 'http-errors';
 import logger from './logger';
 
 // middleware
@@ -36,9 +37,9 @@ app.use(vehicleRouter);
 app.use(maintenanceLogRouter);
 app.use(attachmentRouter);
 
-app.all('*', (request, response) => {
+app.all('*', (request, response, next) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
-  return response.sendStatus(404).send('Route Not Registered');
+  return next(new HttpError(404, 'Route Not Registered', { expose: false }));
 });
 
 app.use(errorMiddleware);
@@ -58,9 +59,7 @@ const startServer = () => {
 const stopServer = () => {
   return mongoose.disconnect()
     .then(() => {
-      server.close(() => {
-        console.log('Server is off');
-      });
+      server.close();
     })
     .catch((err) => {
       throw err;
