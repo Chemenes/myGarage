@@ -11,7 +11,7 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 const attachmentRouter = new Router();
 
 attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: not authorized', { expose: false }));
+  if (!request.profile) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: no profile created.', { expose: false }));
 
   const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
   if (!modelName) {
@@ -23,7 +23,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
   }
 
   if (request.files.length !== 1) {
-    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request', { expose: false }));
+    return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request, missing file.', { expose: false }));
   }
 
   const [file] = request.files;
@@ -48,7 +48,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
       }).save();
     })
     .then((newAttachment) => {
-      logger.log(logger.INFO, `ATTACHMENT ROUTER POST: new attachment created: ${JSON.stringify(newAttachment, null, 2)}`);
+      logger.log(logger.INFO, `ATTACHMENT ROUTER POST: new ${modelName} attachment created: ${JSON.stringify(newAttachment, null, 2)}`);
       savedAttachment = newAttachment;
       return newAttachment.attach(modelName, request.query[modelName]);
     })
@@ -59,7 +59,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any
 });
 
 attachmentRouter.get('/api/attachments', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(401), 'ATTACHMENT ROUTER GET: invalid request', { expose: false });
+  if (!request.profile) return next(new HttpErrors(401), 'ATTACHMENT ROUTER GET: invalid request: missing profile.', { expose: false });
 
   if (!request.query.id) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER GET ERROR: missing ID query', { expose: false }));

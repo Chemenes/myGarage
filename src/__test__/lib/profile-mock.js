@@ -7,6 +7,7 @@ const createProfileMockPromise = async () => {
 
   const mockAccountData = await createAccountMockPromise();
   mockData.account = mockAccountData.account;
+  mockData.originalRequest = mockAccountData.originalRequest;
   mockData.token = mockAccountData.token;
       
   const mockProfile = {

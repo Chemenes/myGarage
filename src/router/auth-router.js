@@ -32,7 +32,7 @@ authRouter.post('/api/signup', (request, response, next) => {
 
 // update account info requires bearer token
 authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response, next) => {
-  if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: bad request', { expose: false }));
+  // we won't get here unless we pass bearerAuthMiddleware so we know we'll have a valid account.
 
   if (!['email', 'pw'].includes(request.params.update)) return next(new HttpErrors(404, `AUTH-ROUTER: route not registered: /api/update/${request.params.update}`));
 
@@ -49,8 +49,8 @@ authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response,
 
         return Account.findByIdAndUpdate(newAccount._id, newAccount);
       })
-      .then((result) => {
-        if (!result) return next(new HttpErrors(404, 'AUTH-ROUTER: account ID not found', { expose: false }));
+      .then(() => {
+        // There's no point testing for account not found because we wouldn't be here of it hadn't been find.
         return response.sendStatus(200);
       })
       .catch(next);
@@ -66,8 +66,7 @@ authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response,
 
       return Account.findByIdAndUpdate(newAccount._id, newAccount);
     })
-    .then((result) => {
-      if (!result) return next(new HttpErrors(404, 'AUTH-ROUTER: account ID not found', { expose: false }));
+    .then(() => {
       return response.sendStatus(200);
     })
     .catch(next);
@@ -76,7 +75,7 @@ authRouter.put('/api/account/:update', bearerAuthMiddleware, (request, response,
 
 authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
   let savedToken;
-  if (!request.account) return next(new HttpErrors(400, 'AUTH-ROUTER: invalid request', { expose: false }));
+  // if we made it past basicAuthMiddleware we'll have a valid accont object on request.
   Account.init()
     .then(() => {
       return request.account.createTokenPromise();
