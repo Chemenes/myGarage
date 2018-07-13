@@ -2,9 +2,9 @@
 
 import superagent from 'superagent';
 import bearerAuth from 'superagent-auth-bearer';
-import faker from 'faker';
 import { startServer, stopServer } from '../lib/server';
 import { createAttachmentMockPromise, removeAttProfAccntMock } from './lib/attachment-mock';
+import { createAccountMockPromise } from './lib/account-mock';
 
 bearerAuth(superagent);
 
@@ -56,44 +56,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
 
     test('POST 401 to /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      } 
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile)
           .query({ profile: profile._id.toString() });
@@ -173,45 +140,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
 
     test('401 GET /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;
-
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }  
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.get(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .query({ id: attachment._id.toString() });
         expect(response).toEqual('400 GET returned unexpected response');
       } catch (err) {
@@ -254,44 +187,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
 
     test('401 DELETE /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.delete(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .query({ id: attachment._id.toString() });
         expect(response).toEqual('Unexpected success deleting w/o profile');
       } catch (err) {
@@ -310,7 +210,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
         expect(err.status).toEqual(404);
       }
     });
-    
+
     test('DELETE 400 bad request', async () => {
       try {
         await superagent.delete(`${apiUrl}/attachments`)

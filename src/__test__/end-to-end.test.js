@@ -8,7 +8,6 @@ import Vehicle from '../model/vehicle';
 import Logs from '../model/maintenance-log';
 import Attachment from '../model/attachment';
 
-
 import { startServer, stopServer } from '../lib/server';
 
 bearerAuth(superagent);
