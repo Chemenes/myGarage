@@ -84,138 +84,33 @@ describe('TESTING ROUTER PROFILE', () => {
 
   describe('GET PROFILES ROUTE TESTING', () => {
     test('GET 200 on successfull profile retrieval', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
-    
-      //
-      // We're logged in, now create a profile
-      //
-      const mockProfile = {
-        bio: faker.lorem.words(20),
-        location: faker.address.city(),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-      };
+      const mockProfile = await createProfileMockPromise();
       let response;
       try {
-        response = await superagent.post(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
-          .send(mockProfile);
-      } catch (err) {
-        expect(err).toEqual('POST 200 test that should pass');
-      }
-      expect(response.status).toEqual(200);
-      let profileResult = response.body;
-      expect(profileResult.bio).toEqual(mockProfile.bio);
-
-      // now we should be able to get the profile using our login token
-      try {
         response = await superagent.get(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token);
-        profileResult = response.body;
+          .authBearer(mockProfile.token);
+        // profileResult = response.body;
       } catch (err) {
         expect(err).toEqual('Failure of profile GET unexpected');
       }
-      expect(profileResult.firstName).toEqual(mockProfile.firstName);
+      expect(response.body.firstName).toEqual(mockProfile.profile.firstName);
     });
 
     test('GET 400 on profile not found', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      let signupResult; /*eslint-disable-line*/
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-        signupResult = response.body;
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      } 
-
+      const mock = await createAccountMockPromise();
       try {
         const response = await superagent.get(`${apiUrl}/profiles`)/*eslint-disable-line*/
-          .authBearer(loginResult.token);
+          .authBearer(mock.token);
       } catch (err) {
         expect(err.status).toEqual(404);
       }
     });
 
     test('GET 404 on profile not found', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      let signupResult;
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-        signupResult = response.body;
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      // there's no profile associated with this new account so trying to GET
-      // it should fail with a 404 error
-
+      const mock = await createAccountMockPromise();
       try {
         const response = await superagent.get(`${apiUrl}/profiles`)
-          .authBearer(signupResult.token);
+          .authBearer(mock.token);
         expect(response).toEqual('GET profile should have failed with 404');
       } catch (err) {
         expect(err.status).toEqual(404);
@@ -244,191 +139,40 @@ describe('TESTING ROUTER PROFILE', () => {
 
   describe('PUT PROFILES ROUTE TESTING', () => {
     test('PUT 200 successful update of existing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
-    
-      //
-      // We're logged in, now create a profile
-      //
-      const mockProfile = {
-        bio: faker.lorem.words(20),
-        location: faker.address.city(),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-      };
+      const mock = await createProfileMockPromise();
       let response;
-      try {
-        response = await superagent.post(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
-          .send(mockProfile);
-      } catch (err) {
-        expect(err).toEqual('POST 200 test that should pass');
-      }
-      expect(response.status).toEqual(200);
-      let profileResult = response.body;
-      expect(profileResult.bio).toEqual(mockProfile.bio);
-
-      // now we should be able to get the profile using our login token
-      try {
-        response = await superagent.get(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token);
-        profileResult = response.body;
-      } catch (err) {
-        expect(err).toEqual('Failure of profile GET unxpected');
-      }
-      expect(profileResult.firstName).toEqual(mockProfile.firstName);
-
       // now change one property of the profile and update it.
       try {
         response = await superagent.put(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .send({ bio: 'this is our updated bio' });
       } catch (err) {
         expect(err).toEqual('POST 200 test that should pass');
       }
       expect(response.status).toEqual(200);
-      expect(response.body.accountId).toEqual(profileResult.accountId.toString());
+      expect(response.body.accountId).toEqual(mock.profile.accountId.toString());
       expect(response.body.bio).toEqual('this is our updated bio');
     });
 
     test('PUT 400  update of existing profile without body', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
-      const mockProfile = {
-        bio: faker.lorem.words(20),
-        location: faker.address.city(),
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-      };
-      let response;
-      try {
-        response = await superagent.post(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
-          .send(mockProfile);
-      } catch (err) {
-        expect(err).toEqual('POST 200 test that should pass');
-      }
-      expect(response.status).toEqual(200);
-      let profileResult = response.body;
-      expect(profileResult.bio).toEqual(mockProfile.bio);
+      const mock = await createProfileMockPromise();
 
       try {
-        response = await superagent.get(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token);
-        profileResult = response.body;
-      } catch (err) {
-        expect(err).toEqual('Failure of profile GET unexpected');
-      }
-      expect(profileResult.firstName).toEqual(mockProfile.firstName);
-
-      try {
-        response = await superagent.put(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
-          .send();
+        await superagent.put(`${apiUrl}/profiles`)
+          .authBearer(mock.token)
+          .send({});
       } catch (err) {
         expect(err.status).toEqual(400);
       }
     });
 
     test('PUT 404 profile not found', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
+      const mock = await createAccountMockPromise();
 
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
-
-      let response;
       const profile = await createProfileMockPromise();
       try {
-        response = await superagent.put(`${apiUrl}/profiles`)
-          .authBearer(loginResult.token)
+        const response = await superagent.put(`${apiUrl}/profiles`)
+          .authBearer(mock.token)
           .send(profile);
         expect(response).toEqual('PUT should have returned 404...');
       } catch (err) {

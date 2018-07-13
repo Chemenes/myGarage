@@ -2,9 +2,10 @@
 
 import superagent from 'superagent';
 import bearerAuth from 'superagent-auth-bearer';
-import faker from 'faker';
+
 import { startServer, stopServer } from '../lib/server';
 import { createAttachmentMockPromise, removeAttProfAccntMock } from './lib/attachment-mock';
+import { createAccountMockPromise } from './lib/account-mock';
 
 bearerAuth(superagent);
 
@@ -30,8 +31,14 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   });
   afterEach(async () => {
     await removeAttProfAccntMock();
+    // await fs.remove(`${__dirname}/../temp/*`);
   });
 
+  // After running the POST tests together I have three temp files left,
+  // even though four of the six tests leave a file behind when run 
+  // standalone (.only)
+
+  // this test DOES NOT leave a temp file behind
   describe('POST ROUTES TO /api/attachments', () => {
     test('POST 200 to /api/attachments', async () => {
       let response;
@@ -55,45 +62,14 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       expect(response.body.attachments).toHaveLength(1);
     });
 
+    // this test leaves a temp file behind. Two files left when this test
+    // isn't run with the other four "litterers"
     test('POST 401 to /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      } 
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile)
           .query({ profile: profile._id.toString() });
@@ -103,6 +79,8 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       }
     });
 
+    // this test leaves a temp file behind. Leaves 2 files behind when not run
+    // with the other four
     test('POST 400 to /api/attachments with missing model info', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
@@ -116,6 +94,8 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       }
     });
 
+    // this test leaves a temp file behind. Not running this test with
+    // the four the leave files behind individually leaves three files.
     test('POST 401 to /api/attachments with bad token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
@@ -129,6 +109,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       }
     });
 
+    // so does this one. Not running it with the 3 above leaves TWO files behind.
     test('POST 400 to /api/attachments with bad model name', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
@@ -142,6 +123,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
       }
     });
 
+    // this one DOES NOT leave a temp file behind
     test('POST 400 to /api/attachments with missing file', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
@@ -173,45 +155,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
 
     test('401 GET /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;
-
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }  
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.get(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .query({ id: attachment._id.toString() });
         expect(response).toEqual('400 GET returned unexpected response');
       } catch (err) {
@@ -254,44 +202,11 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     });
 
     test('401 DELETE /api/attachments missing profile', async () => {
-      //
-      // Create account /api/signup
-      //
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      //
-      // use new account to log in
-      //
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
+      const mock = await createAccountMockPromise();
 
       try {
         const response = await superagent.delete(`${apiUrl}/attachments`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .query({ id: attachment._id.toString() });
         expect(response).toEqual('Unexpected success deleting w/o profile');
       } catch (err) {
@@ -310,7 +225,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
         expect(err.status).toEqual(404);
       }
     });
-    
+
     test('DELETE 400 bad request', async () => {
       try {
         await superagent.delete(`${apiUrl}/attachments`)

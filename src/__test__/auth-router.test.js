@@ -9,11 +9,20 @@ import { createProfileMockPromise } from './lib/profile-mock';
 bearerAuth(superagent);
 
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
-beforeAll(startServer);
+beforeAll(async () => { await startServer(); });
 afterAll(stopServer);
 beforeEach(removeAccountMockPromise);
 
 describe('AUTH router signup (post) tests', () => {
+  test('Test function of catch-all route in server', async () => {
+    try {
+      const response = await superagent.get(`${apiUrl}/notaroute`);
+      expect(response.status).toEqual('Bad route should have returned 404');
+    } catch (err) {
+      expect(err.status).toEqual(404);
+    }
+  });
+
   test('/api/signup 200 success', async () => {
     const mockAccount = {
       username: faker.internet.userName(),

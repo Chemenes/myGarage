@@ -5,6 +5,7 @@ import { startServer, stopServer } from '../lib/server';
 import { createMaintenanceLogMockPromise } from './lib/maintenance-log-mock';
 import { createVehicleMockPromise, removeAllResources } from './lib/vehicle-mock';/*eslint-disable-line*/
 import { createAttachmentMockPromise } from './lib/attachment-mock';
+import { createAccountMockPromise } from './lib/account-mock';
 import logger from '../lib/logger';
 
 bearerAuth(superagent);
@@ -84,43 +85,15 @@ describe('TESTING MAINT LOG ROUTER', () => {
     });
 
     test('PUT 400 on profile not found', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      } 
-
       let response;
-      const mock = await createVehicleMockPromise();
+      let mock = await createVehicleMockPromise();
       const vehicle = mock.vehicle;  /*eslint-disable-line*/
+      mock = await createAccountMockPromise();
       const maintenanceLog = await createMaintenanceLogMockPromise();
       try {
         response = await superagent.put(`${apiUrl}/maintenance-logs`)
           .query({ id: vehicle._id })
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .send(maintenanceLog);
         expect(response).toEqual('PUT should have returned 400...');
       } catch (err) {
@@ -240,34 +213,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
     });
 
     test('POST 400 to /api/maintenance-logs for maintenance log with no profile', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
+      const mock = await createAccountMockPromise();
 
       const mockGarage = {
         name: faker.name.firstName(),
@@ -278,7 +224,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
       
       try {
         response = await superagent.post(`${apiUrl}/maintenance-logs`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .send(mockGarage);
         expect(response).toEqual('Unexpected success where we should have failed on profile.');
       } catch (err) {
@@ -316,34 +262,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
     });
 
     test('GET 400 to /api/maintenace-logs for garage with no profile', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      }
+      const mock = await createAccountMockPromise();
 
       const mockGarage = {
         name: faker.name.firstName(),
@@ -354,7 +273,7 @@ describe('TESTING MAINT LOG ROUTER', () => {
       
       try {
         response = await superagent.get(`${apiUrl}/maintenance-logs`)
-          .authBearer(loginResult.token)
+          .authBearer(mock.token)
           .send(mockGarage);
         expect(response).toEqual('Unexpected success where we should have failed on profile.');
       } catch (err) {
@@ -475,46 +394,15 @@ describe('TESTING MAINT LOG ROUTER', () => {
         expect(err.status).toEqual(400);
       }
     });
-    test('PUT 400 on profile not found', async () => {
-      const testUsername = faker.internet.userName();
-      const testPassword = faker.lorem.words(2);
-      const testEmail = faker.internet.email();
-      const mockAccount = {
-        username: testUsername,
-        email: testEmail,
-        password: testPassword,
-      };
-      
-      try {
-        const response = await superagent.post(`${apiUrl}/signup`)
-          .send(mockAccount);
-        expect(response.status).toEqual(200);
-      } catch (err) {
-        expect(err).toEqual('Unexpected error testing good signup.');
-      }
-
-      let loginResult;  
-      try {
-        const response = await superagent.get(`${apiUrl}/login`)
-          .auth(testUsername, testPassword); 
-        loginResult = response.body;
-        expect(response.status).toEqual(200);
-        expect(response.body.token).toBeTruthy();
-        expect(response.body.profileId).toBeNull();
-      } catch (err) {
-        expect(err.status).toEqual('Unexpected error response from valid signIn');
-      } 
-
-      let response;
-      const mock = await createVehicleMockPromise();
-      const vehicle = mock.vehicle;  /*eslint-disable-line*/
+    
+    test('DELETE 400 on profile not found', async () => {
+      const mock = await createAccountMockPromise();
       const maintenanceLog = await createMaintenanceLogMockPromise();
       try {
-        response = await superagent.delete(`${apiUrl}/maintenance-logs`)
-          .query({ id: vehicle._id })
-          .authBearer(loginResult.token)
-          .send(maintenanceLog);
-        expect(response).toEqual('PUT should have returned 400...');
+        const response = await superagent.delete(`${apiUrl}/maintenance-logs`)
+          .query({ id: maintenanceLog.maintenanceLog._id })
+          .authBearer(mock.token);
+        expect(response).toEqual('DELETE should have returned 400...');
       } catch (err) {
         expect(err.status).toEqual(400);
       }

@@ -12,13 +12,14 @@ const s3Upload = (path, key) => {
     Body: fs.createReadStream(path),
   };
 
+  let s3response;
   return amazonS3.upload(uploadOptions).promise()
     .then((response) => {
+      s3response = response;
       logger.log(logger.INFO, `RECEIVED RESPONSE FROM AWS: ${JSON.stringify(response, null, 2)}`);
-      return fs.remove(path)
-        .then(() => response.Location)
-        .catch(Promise.reject);
-    }) 
+      return fs.remove(path);
+    })
+    .then(() => s3response.Location)
     .catch((err) => {
       return fs.remove(path)
         .then(() => Promise.reject(err))
