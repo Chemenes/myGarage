@@ -4,6 +4,7 @@ import faker from 'faker';
 
 import { startServer, stopServer } from '../lib/server';
 import { createAccountMockPromise, removeAccountMockPromise } from './lib/account-mock';
+import { createProfileMockPromise } from './lib/profile-mock';
 
 bearerAuth(superagent);
 
@@ -58,7 +59,7 @@ describe('AUTH router signup (post) tests', () => {
 });
 
 describe('basic AUTH router login (get) tests', () => {
-  test('GET 200 to api/login for successful login and receipt of a TOKEN', async () => {
+  test('GET 200 to api/login for successful login (no profile) and receipt of a TOKEN', async () => {
     const mockData = await createAccountMockPromise();
     try {
       const response = await superagent.get(`${apiUrl}/login`)
@@ -68,6 +69,21 @@ describe('basic AUTH router login (get) tests', () => {
       expect(response.body.profileId).toBeDefined();
     } catch (err) {
       expect(err.status).toEqual('Unexpected error response from valid signIn');
+    }
+  });
+
+  test('GET 200 to api/login for success and profile', async () => {
+    const mock = await createProfileMockPromise();
+    const username = mock.originalRequest.username; /*eslint-disable-line*/
+    const password = mock.originalRequest.password; /*eslint-disable-line*/
+    try {
+      const response = await superagent.get(`${apiUrl}/login`)
+        .auth(username, password);
+      expect(response.status).toEqual(200);
+      expect(response.body.profileId).toBeTruthy();
+      expect(response.body.token).toBeTruthy();
+    } catch (err) {
+      expect(err.status).toEqual(400);
     }
   });
 
