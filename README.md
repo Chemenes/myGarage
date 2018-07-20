@@ -1,6 +1,6 @@
 # MyGarage
 ## CF 401 Mid-Term project
-
+<!-- JV: Save for the fact that your links to jump to sections fo the README do not work, this is awesome documentation and helped me do a succesful post request on Postman for an account, profile, and image -->
 [![Build Status](https://travis-ci.com/Chemenes/myGarage.svg?branch=master)](https://travis-ci.com/Chemenes/myGarage)
 
 ## Table of Contents
@@ -79,6 +79,7 @@ MyGarage is live on Swagger.io! [Click here](https://app.swaggerhub.com/apis/Dev
 
 Click on a route to jump to its documentation
 
+<!-- JV: These hashtag links are not jumping  to their appropriate section like I thought it should-->
 - POST (Create)
   - [/api/signup](#POST-/api/signup)
   - [/api/profiles](#POST-/api/profiles)
@@ -538,6 +539,7 @@ Status codes 404 will return if a attachment is not found, 401 for a missing tok
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
+<!-- JV: Load Testing Analysis is awesome! -->
 ### Load Testing Analysis
 
 The API was tested on the production environment hosted by Heroku with MongoDB provisioned by mLab. Note that both of these resources are of the "sandbox" or free variety so these results must be understood with that in mind. Provisioning the API with "paid" resources providing parallel execution of multiple server instances would significantly improve results.

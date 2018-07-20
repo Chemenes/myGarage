@@ -7,6 +7,7 @@ export default (error, request, response, next) => { /*eslint-disable-line*/
   // I might have a status property
   if (error.status) {
     logger.log(logger.ERROR, `ERROR MIDDLEWARE: Responding with a ${error.status} code and message ${error.message}`);
+    // console.log(response, 'what')
     return response.sendStatus(error.status);
   }
 

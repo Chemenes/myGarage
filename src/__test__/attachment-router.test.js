@@ -9,15 +9,22 @@ import { createAccountMockPromise } from './lib/account-mock';
 
 bearerAuth(superagent);
 
-const testFile = `${__dirname}/asset/r1200.jpg`;
+const bigPic = 'r1200.jpg';
+const smallPic = 'test.png';
+
+const testFile = `${__dirname}/asset/${smallPic}`;
 const apiUrl = `http://localhost:${process.env.PORT}/api`;
 
 describe('TESTING ROUTES AT /api/attachments', () => {
   let token;
   let profile; /*eslint-disable-line*/
   let attachment;
+
+  // JV:  I am getting ECONNRESET errors here because your test asset is HUGE at 3.36 MB. Your POST 401 and 2/3 of your POST 400 tests fail. Your first 200 POST works, and your last 400 post test works. It is odd that the 4 in the middle are failing. After much debugging, I found out that your test asset is incredibly huge and actually causes the server to err out prematurely with ECONNRESET so that your subsequent requests do not properly complete to send a proper response back to the client.
   beforeAll(startServer);
   afterAll(stopServer);
+  // beforeEach(startServer);
+  // afterEach(stopServer);
   beforeEach(async () => {
     try {
       const mockData = await createAttachmentMockPromise();
@@ -39,7 +46,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
   // standalone (.only)
 
   // this test DOES NOT leave a temp file behind
-  describe('POST ROUTES TO /api/attachments', () => {
+  describe.only('POST ROUTES TO /api/attachments', () => {
     test('POST 200 to /api/attachments', async () => {
       let response;
       try {
@@ -66,7 +73,8 @@ describe('TESTING ROUTES AT /api/attachments', () => {
     // isn't run with the other four "litterers"
     test('POST 401 to /api/attachments missing profile', async () => {
       const mock = await createAccountMockPromise();
-
+      // console.log(`${apiUrl}/attachments`, 'WHAT IS THIS')
+      // console.log(mock.token)
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
           .authBearer(mock.token)
@@ -75,6 +83,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .query({ profile: profile._id.toString() });
         expect(response).toEqual('POST 400 unexpected response');
       } catch (err) {
+        console.log(err, 'WHAT');
         expect(err.status).toEqual(401);
       }
     });
@@ -96,7 +105,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
 
     // this test leaves a temp file behind. Not running this test with
     // the four the leave files behind individually leaves three files.
-    test('POST 401 to /api/attachments with bad token', async () => {
+    test.only('POST 401 to /api/attachments with bad token', async () => {
       try {
         const response = await superagent.post(`${apiUrl}/attachments`)
           .authBearer('bad-token')
@@ -105,6 +114,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .query({ vehicle: attachment._id.toString() });
         expect(response).toEqual('POST 401 unexpected response');
       } catch (err) {
+        console.log(err, 'err');
         expect(err.status).toEqual(401);
       }
     });
