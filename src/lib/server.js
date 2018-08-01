@@ -21,9 +21,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 let server = null;
 
-
 // third party apps
-app.use(cors());
+// app.use(cors());
+const corsOptions = {
+  // origin: process.env.CORS_ORIGINS,
+  // "origin" defines what front end domains are permitted to access our API, we need to implement this to prevent any potential attacks
+  origin: (origin, cb) => {
+    if (!origin) {
+      // assume Google API or Cypress
+      cb(null, true);
+    } else if (origin.includes(process.env.CORS_ORIGINS)) {
+      cb(null, true);
+    } else {
+      throw new Error(`${origin} not allowed by CORS`);
+    }
+  },
+  credentials: true, // Configures the Access-Control-Allow-Credentials CORS header. Set to true to pass the header, otherwise it is omitted.
+};
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -36,6 +51,7 @@ app.use(garageRouter);
 app.use(vehicleRouter);
 app.use(maintenanceLogRouter);
 app.use(attachmentRouter);
+
 
 app.all('*', (request, response, next) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
