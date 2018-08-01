@@ -43,6 +43,17 @@ profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, nex
   return undefined;
 });
 
+profileRouter.get('/api/profiles/me', bearerAuthMiddleware, (request, response, next) => {
+  if (!request.account) return next(new HttpErrors(400, 'PROFILE ROUTER GET: invalid request', { expose: false }));
+
+  return Profile.findOne({ accountId: request.account._id })
+    .then((profile) => {
+      if (!profile) return next(new HttpErrors(404, 'not found', { expose: false }));
+      return response.json(profile);
+    })
+    .catch(next);
+});
+
 // update route
 profileRouter.put('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));
