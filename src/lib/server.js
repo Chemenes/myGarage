@@ -23,7 +23,17 @@ let server = null;
 
 
 // third party apps
-app.use(cors());
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (origin.includes(process.env.CORS_ORIGINS)) {
+      cb(null, true);
+    } else {
+      throw new Error(`${origin} not allowed by CORS`);
+    }
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

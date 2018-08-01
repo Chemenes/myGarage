@@ -25,6 +25,8 @@ authRouter.post('/api/signup', (request, response, next) => {
     })
     .then((token) => {
       logger.log(logger.INFO, `AUTH-ROUTER /api/signup: returning a 200 code and a token ${token}`);
+      const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('X-401d25-Token', token, cookieOptions);
       return response.json({ token });
     })
     .catch(next);
@@ -81,6 +83,8 @@ authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
       return request.account.createTokenPromise();
     })
     .then((token) => {
+      const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('X-401d25-Token', token, cookieOptions);
       savedToken = token;
       return profile.findOne({ accountId: request.account._id });
     })
