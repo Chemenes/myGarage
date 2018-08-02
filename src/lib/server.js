@@ -15,6 +15,7 @@ import attachmentRouter from '../router/attachment-router';
 import garageRouter from '../router/garage-router';
 import vehicleRouter from '../router/vehicle-router';
 import maintenanceLogRouter from '../router/maintenance-log-router';
+import googleOAuthRouter from '../router/google-oauth-router';
 
 
 const app = express();
@@ -24,15 +25,21 @@ let server = null;
 
 // third party apps
 const corsOptions = {
+  // origin: process.env.CORS_ORIGINS,
+  // "origin" defines what front end domains are permitted to access our API, we need to implement this to prevent any potential attacks
   origin: (origin, cb) => {
-    if (origin.includes(process.env.CORS_ORIGINS)) {
+    if (!origin) {
+      // assume Google API or Cypress
+      cb(null, true);
+    } else if (origin.includes(process.env.CORS_ORIGINS)) {
       cb(null, true);
     } else {
       throw new Error(`${origin} not allowed by CORS`);
     }
   },
-  credentials: true,
+  credentials: true, // Configures the Access-Control-Allow-Credentials CORS header. Set to true to pass the header, otherwise it is omitted.
 };
+
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -46,6 +53,7 @@ app.use(garageRouter);
 app.use(vehicleRouter);
 app.use(maintenanceLogRouter);
 app.use(attachmentRouter);
+app.use(googleOAuthRouter);
 
 app.all('*', (request, response, next) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
