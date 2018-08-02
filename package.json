@@ -9,7 +9,9 @@
     "tests": "jest --coverage --detectOpenHandles --forceExit --runInBand",
     "test-logs": "jest --coverage --detectOpenHandles --runInBand",
     "start": "npm run build && node index.js",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "dbon": "mkdir -p ./db && mongod --dbpath ./db",
+    "dboff": "killall mongod"
   },
   "jest": {
     "setupFiles": [
@@ -41,7 +43,7 @@
     "eslint-plugin-jest": "^21.17.0",
     "faker": "^4.1.0",
     "jest": "^23.3.0",
-    "nodemon": "^1.17.5",
+    "nodemon": "^1.18.3",
     "superagent": "^3.8.3",
     "superagent-auth-bearer": "0.0.1",
     "winston": "^3.0.0"
