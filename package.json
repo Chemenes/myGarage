@@ -9,7 +9,9 @@
     "tests": "jest --coverage --detectOpenHandles --forceExit --runInBand",
     "test-logs": "jest --coverage --detectOpenHandles --runInBand",
     "start": "npm run build && node index.js",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "dbon": "mkdir -p ./db && mongod --dbpath ./db",
+    "dboff": "killall mongod"
   },
   "jest": {
     "setupFiles": [
