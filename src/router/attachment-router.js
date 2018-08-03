@@ -34,7 +34,8 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, attachmentRouter
   const [file] = request.files;
 
   const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
-
+  const description = request.query.desc ? request.query.desc : '';
+  logger.log(logger.INFO, `ATTACHMENT ROUTER POST to ${modelName}=${request.query[modelName]}&desc=${description}`);
   logger.log(logger.INFO, `ATTACHMENT ROUTER POST: valid file ready to to upload: ${JSON.stringify(file, null, 2)}`);
 
   const key = `${file.filename}.${file.originalname}`;
@@ -45,6 +46,7 @@ attachmentRouter.post('/api/attachments', bearerAuthMiddleware, attachmentRouter
       logger.log(logger.INFO, `ATTACHMENT ROUTER POST: received a valid URL from Amazon S3: ${url}`);
       return new Attachment({
         originalName: file.originalname,
+        description,
         encoding: file.encoding,
         mimeType: file.mimetype,
         url,
