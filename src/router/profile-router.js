@@ -28,7 +28,7 @@ profileRouter.post('/api/profiles', bearerAuthMiddleware, (request, response, ne
   return undefined;
 });
 
-profileRouter.get('/api/profiles', bearerAuthMiddleware, (request, response, next) => {
+profileRouter.get(['/api/profiles', '/api/profiles/me'], bearerAuthMiddleware, (request, response, next) => {
   if (!request.profile) return next(new HttpErrors(404, 'PROFILE ROUTER GET: profile not found. Missing login info.', { expose: false }));
 
   Profile.init()
