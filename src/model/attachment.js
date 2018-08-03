@@ -12,6 +12,7 @@ const attachmentSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  description: String, // optional
   mimeType: { // from multer. file's mime-type
     type: String,
     required: true,
