@@ -25,6 +25,8 @@ authRouter.post('/api/signup', (request, response, next) => {
     })
     .then((token) => {
       logger.log(logger.INFO, `AUTH-ROUTER /api/signup: returning a 200 code and a token ${token}`);
+      const cookieOption = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('X-Pizza-Token', token, cookieOption);
       return response.json({ token });
     })
     .catch(next);
@@ -82,6 +84,8 @@ authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
     })
     .then((token) => {
       savedToken = token;
+      const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('X-Pizza-Token', token, cookieOptions);
       return profile.findOne({ accountId: request.account._id });
     })
     .then((newProfile) => {
