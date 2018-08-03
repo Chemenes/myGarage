@@ -34,7 +34,6 @@ const corsOptions = {
     if (!origin) {
       // assume Google API or Cypress
       cb(null, true);
-    // } else if (origin.includes(process.env.CORS_ORIGINS)) {
     } else if (process.env.CORS_ORIGINS.includes(origin)) {
       cb(null, true);
     } else {
