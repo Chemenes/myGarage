@@ -42,6 +42,7 @@ const corsOptions = {
   },
   credentials: true, // Configures the Access-Control-Allow-Credentials CORS header. Set to true to pass the header, otherwise it is omitted.
 };
+
 // third party apps
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
@@ -57,6 +58,7 @@ app.use(garageRouter);
 app.use(vehicleRouter);
 app.use(maintenanceLogRouter);
 app.use(attachmentRouter);
+
 
 app.all('*', (request, response, next) => {
   logger.log(logger.INFO, 'returning 404 from the catch/all route');
