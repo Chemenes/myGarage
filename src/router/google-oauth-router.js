@@ -40,6 +40,7 @@ googleOAuthRouter.get('/api/oauth/google', (request, response, next) => {
 
   */
 
+  // console.log('google auth request.headers.host object', request.originalUrl);
   // I will already have a request.query.code attached to the request object from Google at this point
   if (!request.query.code) {
     logger.log(logger.ERROR, 'DID NOT GET CODE FROM GOOGLE');
@@ -98,8 +99,9 @@ googleOAuthRouter.get('/api/oauth/google', (request, response, next) => {
       done = true;
       myGarageToken = loginResult.body.token;
       const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      console.log('oAuth: sending cookie Lab37ServerToken=', myGarageToken);
       response.cookie('Lab37ServerToken', myGarageToken, cookieOptions);
-
+      console.log('oAuth: redirecting to', process.env.CLIENT_URL);
       return response.redirect(process.env.CLIENT_URL);
     })
     .catch(() => {
