@@ -262,7 +262,7 @@ Errors are reported for bad request and invalid token.
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### POST /api/attachments?[profile|p|garage|g|vehicle|v|maintenance-log|l]=modelId
+#### POST /api/attachments?[profile|p|garage|g|vehicle|v|maintenance-log|l]=modelId[?desc=An optional description]
 
 Any resource (other than the accounts) can have files attached.  These can be scans of maitenance receipts, images, PDFs, etc.
 
@@ -277,6 +277,7 @@ On success you'll get back JSON in this form:
 {
     "_id": "5b451bdcba1e1c2105154e32",
     "originalName": "r1200.jpg",
+    "description": "A great motorcycle!",
     "encoding": "7bit",
     "mimeType": "image/jpeg",
     "url": "https://mygarage-filestore.s3.amazonaws.com/54a50ac8cd3562a8296929b171e537e9.r1200.jpg",
@@ -310,7 +311,7 @@ Error codes are returned for invalid username or password (401) and bad request 
 
 [Back to API TOC](#API-Routes-and-Documentation)
 
-#### GET /api/profiles
+#### GET /api/profiles[/me]
 
 The profiles GET route returns the profile associated with the current session. You must have done a previous GET /api/login. The profile is found from data stored with the authentication token provided on login which is passed to the server as a bearer auth token.  
 

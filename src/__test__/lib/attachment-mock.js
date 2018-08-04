@@ -15,6 +15,7 @@ const createAttachmentMockPromise = async () => {
   
   const attachment = await new Attachment({
     originalName: faker.system.fileName(),
+    description: 'Description of mocked attachment',
     mimeType: 'mime/type',
     encoding: 'utf-8',
     url: faker.random.image(),

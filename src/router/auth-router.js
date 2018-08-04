@@ -25,6 +25,8 @@ authRouter.post('/api/signup', (request, response, next) => {
     })
     .then((token) => {
       logger.log(logger.INFO, `AUTH-ROUTER /api/signup: returning a 200 code and a token ${token}`);
+      const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('Lab37ServerToken', token, cookieOptions);
       return response.json({ token });
     })
     .catch(next);
@@ -86,6 +88,9 @@ authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
     })
     .then((newProfile) => {
       logger.log(logger.INFO, 'AUTH-ROUTER /api/login - responding with a 200 status code and a token ');
+      const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
+      response.cookie('Lab37ServerToken', savedToken, cookieOptions);
+
       if (newProfile === null) {
         return response.json({ profileId: null, token: savedToken });
       }
@@ -95,5 +100,19 @@ authRouter.get('/api/login', basicAuthMiddleware, (request, response, next) => {
   return undefined;
 });
 
+authRouter.delete('/api/login/DELETE', bearerAuthMiddleware, (request, response, next) => {
+  // a somewhat hidden route that will allow for deletion of the
+  // logged in user's account.  Should delete profile, garages,
+  // etc, as well.
+  Account.init()
+    .then(() => {
+      console.log('authRouter.delete reqeust.account', request.account);
+      return Account.findByIdAndRemove(request.account._id);
+    })
+    .then(() => {
+      response.sendStatus(200);
+    })
+    .catch(next);
+});
 
 export default authRouter;

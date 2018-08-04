@@ -47,11 +47,12 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .authBearer(token)
           .field('filename', 'R1200.JPG')
           .attach('attachment', testFile)
-          .query({ profile: profile._id.toString() });
+          .query({ profile: profile._id.toString(), desc: 'A great motorcycle!' });
       } catch (err) {
         expect(err).toEqual('200 expected. error received');
       }
       expect(response.status).toEqual(200);
+      expect(response.body.description).toEqual('A great motorcycle!');
       try {
         response = await superagent.get(`http://localhost:${process.env.PORT}/api/profiles`)
           .authBearer(token);
@@ -146,6 +147,7 @@ describe('TESTING ROUTES AT /api/attachments', () => {
           .query({ id: attachment._id.toString() });
         expect(response.status).toEqual(200);
         expect(response.body.originalName).toEqual(attachment.originalName);
+        expect(response.body.description).toEqual(attachment.description);
         expect(response.body.profileId).toEqual(attachment.profileId.toString());
         expect(response.body.url).toEqual(attachment.url);
         expect(response.body.awsKey).toEqual(attachment.awsKey);
