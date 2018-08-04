@@ -99,9 +99,7 @@ googleOAuthRouter.get('/api/oauth/google', (request, response, next) => {
       done = true;
       myGarageToken = loginResult.body.token;
       const cookieOptions = { maxAge: 7 * 1000 * 60 * 60 * 24 };
-      console.log('oAuth: sending cookie Lab37ServerToken=', myGarageToken);
       response.cookie('Lab37ServerToken', myGarageToken, cookieOptions);
-      console.log('oAuth: redirecting to', process.env.CLIENT_URL);
       return response.redirect(process.env.CLIENT_URL);
     })
     .catch(() => {
