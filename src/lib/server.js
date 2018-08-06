@@ -35,7 +35,8 @@ const corsOptions = {
     if (!origin) {
       // assume Google API or Cypress
       cb(null, true);
-    } else if (process.env.CORS_ORIGINS.includes(origin)) {
+    // } else if (process.env.CORS_ORIGINS.includes(origin)) {
+    } else if (origin.includes(process.env.CORS_ORIGINS)) {
       console.log('server origin accepted by .includes code');
       cb(null, true);
     } else {
@@ -47,6 +48,14 @@ const corsOptions = {
 
 // third party apps
 app.use(cors(corsOptions));
+
+// cors middleware function from https://jonathanmh.com/how-to-enable-cors-in-express-js-node-js/
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   next();
+// });
+// breaks localhost connection
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
