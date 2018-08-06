@@ -31,6 +31,7 @@ const corsOptions = {
   // origin: process.env.CORS_ORIGINS,
   // "origin" defines what front end domains are permitted to access our API, we need to implement this to prevent any potential attacks
   origin: (origin, cb) => {
+    console.log('server origin:', origin);
     if (!origin) {
       // assume Google API or Cypress
       cb(null, true);
