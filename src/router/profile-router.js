@@ -98,3 +98,5 @@ profileRouter.delete('/api/profiles', bearerAuthMiddleware, (request, response, 
 });
 
 export default profileRouter;
+
+// ..
