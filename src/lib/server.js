@@ -46,7 +46,7 @@ const corsOptions = {
   credentials: true, // Configures the Access-Control-Allow-Credentials CORS header. Set to true to pass the header, otherwise it is omitted.
 };
 // third party apps
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 // cors middleware function from https://jonathanmh.com/how-to-enable-cors-in-express-js-node-js/
 // app.use((req, res, next) => {
@@ -55,6 +55,25 @@ app.use(cors(corsOptions));
 //   next();
 // });
 // breaks localhost connection
+
+// here's the cors docs implementation:
+const whitelist = ['http://localhost:8080', 'http://mygarage-frontend.herokuapp.com'];
+const corsOptions2 = {
+  origin: (origin, callback) => {
+    console.log('server origin:', origin);
+    if (whitelist.indexOf(origin) !== -1) {
+      console.log('server origin passes whitelist.indexOf');
+      callback(null, true);
+    } else {
+      console.log('server origin fails: not allowed');
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+app.options('*', cors(corsOptions2));
+app.use(cors(corsOptions2));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
