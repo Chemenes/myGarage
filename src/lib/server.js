@@ -57,7 +57,9 @@ const corsOptions = {
 // breaks localhost connection
 
 // here's the cors docs implementation:
-const whitelist = ['http://localhost:8080', 'http://mygarage-frontend.herokuapp.com'];
+// const whitelist = ['http://localhost:8080', 'http://mygarage-frontend.herokuapp.com'];
+const whitelist = JSON.parse(process.env.CORS_ORIGINS);
+console.log('server origins whitelist', whitelist);
 const corsOptions2 = {
   origin: (origin, callback) => {
     console.log('server origin:', origin);
