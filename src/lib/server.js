@@ -114,7 +114,9 @@ const startServer = () => {
 const stopServer = () => {
   return mongoose.disconnect()
     .then(() => {
+      console.log('BEFORE SERVER CLOSE')
       server.close();
+      console.log('AFTER SERVER CLOSE')
     })
     .catch((err) => {
       throw err;

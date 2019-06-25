@@ -12,7 +12,9 @@ const multerUpload = multer({ dest: `${__dirname}/../temp` });
 const attachmentRouter = new Router();
 
 const attachmentRouterPostMw = (request, response, next) => {
+
 // attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), (request, response, next) => {
+  console.log(request.profile, 'request.profile')
   if (!request.profile) return next(new HttpErrors(401, 'ATTACHMENT ROUTER POST ERROR: no profile created.', { expose: false }));
 
   const modelName = Object.keys(request.query)[0]; /*eslint-disable-line*/
@@ -27,7 +29,11 @@ const attachmentRouterPostMw = (request, response, next) => {
   return next();
 };
 
-attachmentRouter.post('/api/attachments', bearerAuthMiddleware, attachmentRouterPostMw, multerUpload.any(), (request, response, next) => {
+// JV: I believe your multerUpload middleware should appear second after bearerAuth becuase the placement of this middleware is causing the huge ECONNRESET issue back in your tests. If we fail in attachmentRouterPstMw, the next middleware in the chain is multerUpload and that somehow causes the ECONNRESET issues when using the huge file. That said, after applying these changes, we now err out at your "bad token" test because the bad token error moves on to multerUpload, and nothing is handling that error in multerUpload properly, so we continue to get ECONNRESET errors on this test. My advice would be that multerUpload.any be abstracted away to its own piece of middleware, perhaps even be part of attachmentRouterPostMw, and you can handle errors there, i.e. if a token does not get sent properly. 
+
+// JV: A Postman request to send an attachment takes forever on the r1200 image, perhaps you might want to include some validaton to ensure the uploaded image doesn't exceed a certain size. Even though it could potentially be my own personal Internet connection causing this latency, you should write code to cater to as many users as you can, including users with slow internet conncetions who probably shouldn't be permitted to upload huge images. On that note, saving yourself the trouble of saving huge images in your AWS bucket is also beneficial. 
+attachmentRouter.post('/api/attachments', bearerAuthMiddleware, multerUpload.any(), attachmentRouterPostMw, (request, response, next) => {
+  // JV: checking for a condition if files.length < 1 is probably a better check because this wouldn't hit it if somehow more than 1 file got attached
   if (request.files.length !== 1) {
     return next(new HttpErrors(400, 'ATTACHMENT ROUTER POST ERROR: invalid request, missing file.', { expose: false }));
   }
